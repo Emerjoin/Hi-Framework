@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/XML/1.0.0"
+            xmlns:hi="http://hi-framework.org/XML/1.0.0" elementFormDefault="qualified">
+
+    <xsd:complexType name="webType">
+        <xsd:all maxOccurs="1" minOccurs="1">
+            <xsd:element type="xsd:string" name="views-directory" nillable="false" minOccurs="0" maxOccurs="1"/>
+            <xsd:element type="xsd:string" name="welcome-url" nillable="false" minOccurs="0" maxOccurs="1"></xsd:element>
+            <xsd:element type="hi:templatesType" name="templates" nillable="false" minOccurs="0" maxOccurs="1"></xsd:element>
+        </xsd:all>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="templatesType">
+        <xsd:sequence minOccurs="1">
+            <xsd:element name="template" type="xsd:string" nillable="false" default="index" minOccurs="1" maxOccurs="unbounded">
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="frontiersType">
+        <xsd:sequence>
+            <xsd:element minOccurs="1" maxOccurs="unbounded" name="frontier" type="xsd:string"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <xsd:simpleType name="frontierPackageType">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="4"></xsd:minLength>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="frontierPackagesType">
+        <xsd:sequence>
+            <xsd:element minOccurs="1" maxOccurs="unbounded" name="package" type="hi:frontierPackageType"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <xsd:simpleType name="textType">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="3"></xsd:minLength>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="simpleTextType">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="3"></xsd:minLength>
+            <xsd:pattern value="[A-Za-z0-9]+"></xsd:pattern>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ageUnitsType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="HOURS"></xsd:enumeration>
+            <xsd:enumeration value="DAYS"></xsd:enumeration>
+            <xsd:enumeration value="WEEKS"></xsd:enumeration>
+            <xsd:enumeration value="MONTHS"></xsd:enumeration>
+            <xsd:enumeration value="YEARS"></xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="ageType">
+        <xsd:restriction base="xsd:integer">
+            <xsd:minInclusive value="1"></xsd:minInclusive>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+
+    <xsd:simpleType name="testTestType">
+        <xsd:restriction base="hi:textType">
+            <xsd:minLength value="4"></xsd:minLength>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+
+
+    <xsd:complexType name="testsType">
+
+        <xsd:sequence>
+            <xsd:element type="hi:testTestType" minOccurs="1" maxOccurs="unbounded" name="script"></xsd:element>
+        </xsd:sequence>
+
+    </xsd:complexType>
+
+
+    <xsd:simpleType name="appModeType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="DEVELOPMENT"></xsd:enumeration>
+            <xsd:enumeration value="PRODUCTION"></xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="assetSmartCachingEnabled" >
+        <xsd:restriction base="xsd:anyURI">
+            <xsd:minLength value="3"></xsd:minLength>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="foldersSmartCachingType">
+        <xsd:sequence>
+            <xsd:element type="hi:assetSmartCachingEnabled" minOccurs="1" maxOccurs="unbounded"  name="if-path-starts-with"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+
+    <xsd:complexType name="folderHttpCacheType">
+        <xsd:attribute use="required" name="age-unit" type="hi:ageUnitsType"></xsd:attribute>
+        <xsd:attribute use="required" name="age" type="hi:ageType"></xsd:attribute>
+        <xsd:attribute use="required" name="folder-path" type="xsd:anyURI"></xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="noCacheHintType">
+        <xsd:attribute use="required" name="folder-path" type="xsd:anyURI"></xsd:attribute>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="disabledCachingType">
+        <xsd:sequence>
+            <xsd:element minOccurs="1" maxOccurs="unbounded" name="no-cache-hint" type="hi:noCacheHintType"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="foldersCachingType" >
+
+        <xsd:sequence>
+            <xsd:element minOccurs="1" maxOccurs="unbounded"  type="hi:folderHttpCacheType" name="cache"></xsd:element>
+        </xsd:sequence>
+
+    </xsd:complexType>
+
+    <xsd:complexType name="webrootType">
+        <xsd:all>
+            <xsd:element name="folders-fixed-caching" type="hi:foldersCachingType" minOccurs="0" maxOccurs="1"></xsd:element>
+            <xsd:element name="folders-smart-caching" type="hi:foldersSmartCachingType" minOccurs="0" maxOccurs="1"></xsd:element>
+            <xsd:element name="no-caching-control" type="hi:disabledCachingType" minOccurs="0" maxOccurs="1"  ></xsd:element>
+        </xsd:all>
+    </xsd:complexType>
+
+    <xsd:complexType name="tunningType" >
+        <xsd:sequence>
+            <xsd:element name="webroot" nillable="false" type="hi:webrootType" minOccurs="0" maxOccurs="1"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="appType">
+        <xsd:all>
+            <xsd:element type="xsd:string" name="default-lang" nillable="false" maxOccurs="1" minOccurs="0"></xsd:element>
+            <xsd:element type="hi:appModeType" name="deployment-mode" nillable="false" maxOccurs="1" minOccurs="0" ></xsd:element>
+            <xsd:element type="hi:webType" name="web" minOccurs="0" nillable="false" maxOccurs="1"></xsd:element>
+            <xsd:element type="hi:tunningType" name="web-tuning" nillable="false" minOccurs="0" maxOccurs="1"></xsd:element>
+        </xsd:all>
+    </xsd:complexType>
+
+    <xsd:element name="app" type="hi:appType" nillable="false"></xsd:element>
+</xsd:schema>
