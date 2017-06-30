@@ -149,7 +149,10 @@ public class ES5Library {
         try {
 
             _log.debug("Reading generic client-side (frontiers) code file...");
-            URL res = servletContext.getResource("/frontier.js");
+            URL res = servletContext.getResource("/frontier.min.js");
+            if(AppConfigurations.get().underDevelopment())
+                res = servletContext.getResource("/frontier.js");
+
             if(res!=null){
 
                 InputStream inputStream = res.openStream();
