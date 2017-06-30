@@ -161,7 +161,7 @@ public class MVCReqHandler extends ReqHandler{
         }catch (NoSuchMethodException ex){
             return false;
         }catch (InvocationTargetException e2 ) {
-            throw new MvcException("Exception thrown while invoking action <" + action + "> on controller <" + controller.getCanonicalName() + ">", e2);
+            throw new MvcException("Exception thrown while invoking action <" + action + "> on controller <" + controller.getCanonicalName() + ">", e2.getTargetException());
         }catch (IllegalAccessException e3){
             throw new MvcException("Could not access constructor of Controller <"+controller.getCanonicalName()+">",e3);
         }

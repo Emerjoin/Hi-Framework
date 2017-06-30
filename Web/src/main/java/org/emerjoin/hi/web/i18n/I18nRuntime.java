@@ -35,6 +35,8 @@ public class I18nRuntime {
     }
 
     public static I18nRuntime get(){
+        if(instance==null)
+            throw new I18nException("I18n is not available. Please activate it in Hi.xml");
 
         return instance;
 
