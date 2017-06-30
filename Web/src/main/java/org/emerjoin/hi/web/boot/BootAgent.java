@@ -3,7 +3,10 @@ package org.emerjoin.hi.web.boot;
 import org.emerjoin.hi.web.BootstrapUtils;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.ConfigProvider;
+import org.emerjoin.hi.web.config.xml.sections.I18nConfig;
 import org.emerjoin.hi.web.exceptions.HiException;
+import org.emerjoin.hi.web.i18n.I18nStarter;
+import org.emerjoin.hi.web.i18n.I18nConfiguration;
 import org.emerjoin.hi.web.internal.ES5Library;
 import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.internal.Router;
@@ -18,6 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -176,14 +180,30 @@ public class BootAgent {
 
         makeDeployId(); //Set deploy Id
         loadConfigs(); //Load App configurations
+        initI18n(); //Start I18n
         findControllersAndMap(); //Find all the controller and map them
         findTestedActions(); //Find all the tested controllers actions
         scriptLibrary.init(servletContext);//Load scripts and generate frontiers
         router.init(servletContext,servletConfig); //Register requests handlers
         initBootExtensions(); //Load and execute boot extensions
-
     }
 
+
+    private void initI18n(){
+
+        Optional<I18nConfiguration> configuration = I18nConfig.getConfiguration();
+        if(!configuration.isPresent()) {
+            _log.info("I18n not enabled. Skipping");
+            return;
+        }
+
+        _log.info("I18n enabled. Initializing...");
+        Set<URL> libraries = BootstrapUtils.getLibraries(servletContext);
+        I18nStarter i18NStarter = new I18nStarter(configuration.get(),Optional.of(libraries),servletContext);
+        i18NStarter.start();
+
+
+    }
 
     public String getDeployId(){
 

@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.emerjoin.hi.web.AppContext;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.events.TemplateTransformEvent;
+import org.emerjoin.hi.web.i18n.I18nRuntime;
 import org.emerjoin.hi.web.internal.ES5Library;
 import org.emerjoin.hi.web.mvc.exceptions.ConversionFailedException;
 import org.emerjoin.hi.web.mvc.exceptions.MalMarkedTemplateException;
@@ -76,6 +77,10 @@ public class HTMLizer {
         }
 
         validateTemplate(templateName,templateFileContent);
+
+        if(I18nRuntime.isReady())
+            templateFileContent = I18nRuntime.get().translateTemplate(templateName,templateFileContent);
+
         TemplateTransformEvent templateTransformEvent = new TemplateTransformEvent(templateName,templateFileContent);
         transformEvent.fire(templateTransformEvent);
         templateFileContent = AppConfigurations.get().getTunings().applySmartCaching(templateTransformEvent.getTemplate().getMarkup(),false);
@@ -161,7 +166,6 @@ public class HTMLizer {
         scriptBuilder.append("$ignition();");
         scriptBuilder.append("});}}");
         return scriptBuilder.toString();
-
 
     }
 
@@ -366,6 +370,22 @@ public class HTMLizer {
             viewHTML = requestContext.getData().get("view_content").toString();
             if(viewHTML!=null&&!AppConfigurations.get().underDevelopment())
                 viewHTML = AppConfigurations.get().getTunings().applySmartCaching(viewHTML, true);
+
+        }
+
+
+        if(viewHTML!=null){
+
+             if(I18nRuntime.isReady()){
+
+                 String viewId = requestContext.getData().get("controllerU").toString()+":"+requestContext.getData().get("actionU").toString();
+                 if(withViewMode)
+                     viewId+=viewMode;
+
+                 I18nRuntime i18n = I18nRuntime.get();
+                 viewHTML = i18n.translateView(viewId,viewHTML);
+
+             }
 
         }
 

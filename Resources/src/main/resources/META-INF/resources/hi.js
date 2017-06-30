@@ -333,144 +333,6 @@ Hi.$angular.directives.aload = function(){
 
 };
 
-/**
- * This is an attribute restricted directive
- * The directive allows to translate text content based on a i18n dictionary.
- * The directive can be used in one of many ways:
- * a) <element translate></element> - will translate the element's inner HTML using it as a key
- *                                    to find the translated content.
- *
- * b) <element translate="key"></element> - will translate the element's inner HTML using the specified
- *                                    key to find the translated content.
- *
- * c) <element translate-attribute></element> - will translate the specified element's attribute
- *                                    using its value as the key to find the translated content.
- *
- * d) <element translate-attribute="key"></element> - will translate the specified element's attribute
- *                                    using the provided key to find the translated content.
- *
- */
-Hi.$angular.directives.translate = function(){
-    return  {
-        restrict : 'A',
-        link : function($scope,element,attrs){
-
-
-            var props = Hi.$util.getKidProperties('translate',attrs['$attr']);
-
-            var toMarkup = function(name){
-
-                var capitalKeys=['A','B','C','D','E','F','G','H','I','J','K','L','M',
-                    'N', 'O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-
-                var markupProp = "";
-
-                var  i = 0;
-                for(i=0;i<name.length;i++){
-
-                    var char = name.charAt(i);
-
-                    //Capital key
-                    if(capitalKeys.indexOf(char)!=-1){
-
-                        markupProp+='-';
-
-                    }
-
-                    markupProp+=char.toLowerCase();
-
-
-                }
-
-                return markupProp;
-
-
-            };
-
-
-            props.forEach(function(name,index){
-
-
-                var propName = Hi.$util.camelCase(['translate',Hi.$util.ucfirst(name)]);
-                var propertyHtml = toMarkup(name);
-
-
-                var propKey = attrs[propName];
-
-
-                //A key was defined for this property
-                if(propKey!=""&&propKey!="undefined"&&propKey!=undefined){
-
-
-                    var propValue = $(element).attr(propertyHtml);
-
-                    if(typeof propValue === "undefined" || typeof propValue !== 'string'){
-
-                        return;
-
-                    }
-
-
-                    var translatedKey = Hi.$ui.js.lang.getItem(propKey.trim(),propValue.trim());
-                    $(element).attr(propertyHtml,translatedKey);
-
-
-                }else{
-                    //There is no key. Translate the property value
-
-
-                    var propertyHtml = toMarkup(name);
-                    var propValue = $(element).attr(propertyHtml);
-
-
-
-                    if(typeof propValue == 'undefined' || typeof propValue != 'string'){
-
-                        return;
-
-                    }
-
-
-                    var translatedValue = Hi.$ui.js.lang.getItem(propValue.trim());
-                    $(element).attr(propertyHtml,translatedValue);
-
-
-                }
-
-                $(element).removeAttr('translate-'+propertyHtml);
-
-
-            });
-
-            var translateKey = attrs.translate;
-
-            //Translate inner HTML by Key
-            if(translateKey!=''){
-
-                var innerHTML = $(element).html();
-                var translatedKey = Hi.$ui.js.lang.getItem(translateKey.trim(),innerHTML.trim());
-                $(element).html(translatedKey);
-
-
-            }else{
-
-                //Translate inner HTML content
-
-                var innerHTML = $(element).html();
-                var translatedHtml = Hi.$ui.js.lang.getItem(innerHTML.trim());
-                $(element).html(translatedHtml);
-
-
-            }
-
-            $(element).removeAttr('translate');
-
-        }
-
-    };
-
-
-};
 
 /**
  * This is an element restricted directive.
@@ -939,60 +801,35 @@ Hi.$ui.html.cache.initialize = function(){
 
 };
 
-//Carrega uma view antes de ela ser necessaria
 Hi.$ui.html.prepareView = function(route_name_or_object){
 
-    //Objecto da rota
     var route = false;
 
-    //Parametro eh uma string
     if(typeof route_name_or_object ==='string'){
 
-        //Pega uma rota com nome igual
         route = Hi.$nav.getNamedRoute(route_name_or_object);
 
     }else{
 
-        //Parametro eh um objecto
         route = route_name_or_object;
 
     }
 
-
-    //Rota valida
     if(route){
 
-
-
-        //Gera o caminho da rota
         var path = Hi.$nav.getTextViewPath(route.controller, route.action);
-
-
         var url = Hi.$nav.getURL(route);
-
-        //Esta rota ja foi cacheada
         if(Hi.$ui.html.cache.stores(url)){
-
-
             return;
-
         }
 
-
-
-        //Faz a requisicao GET
-        $.get(url,function(reponse){
+        $.get(url,function(response){
 
 
             try{
 
-                //Faz parse da response para JSON
-                var JSONResponse = JSON.parse(reponse);
-
-                //Pega o HTMK
+                var JSONResponse = JSON.parse(response);
                 var html = JSONResponse.markup;
-
-                //Coloca na cache
                 Hi.$ui.html.cache.storeView(url,html);
 
 
@@ -1245,6 +1082,9 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
 
     }else{
 
+        //if(__.hasOwnProperty("$dictionary"))
+        //    Hi.i18n.dictionary = __["$dictionary"];
+
         if(!__.$startedUp&&__.hasOwnProperty("$startup")){
 
             if(typeof __.$startup=="function"){
@@ -1275,7 +1115,6 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
         AppHooks.fireBeforeView(route,viewScope,injectables);
 
     $injector.invoke(controller,false,injectables);
-
 
     //Apply context variables
     Hi.$ui.js.setScopeProps(viewScope,context_variables);
@@ -1363,17 +1202,11 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
     var closePromise = {};
     closePromise.proceed = function(){
 
-
-
         //Tell the the template that the view was closed
         if(__.hasOwnProperty("$onClose")&&__.hasOwnProperty("$activeView")){
-
             if(typeof __.$onClose=="function"){
-
                 __.$onClose.call(__,__.$activeView.$route);
-
             }
-
         }
 
         var isRedirect = __.hasOwnProperty("$activeView");
@@ -1488,22 +1321,16 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
 
 };
 
-
-
 Hi.$ui.js.commands = {};
 
-//Todos comandos Hi
 Hi.$ui.js.commands.all={};
 
-//Define um comando Hi
 Hi.$ui.js.commands.set = function(key,callback){
 
     Hi.$ui.js.commands.all[key]=callback;
 
 };
 
-
-//Comando para recarregar a pagina
 Hi.$ui.js.commands.set('$reload',function(data){
 
   if(data.hasOwnProperty("url")){
@@ -1530,6 +1357,14 @@ Hi.$ui.js.commands.set('$url',function(data){
 
 });
 
+
+Hi.$ui.js.commands.set("$reloadLanguage",function(data){
+
+    Hi.$ui.html.cache.destroy();
+    document.location.reload();
+
+});
+
 //Redirect the user ajaxically
 Hi.$ui.js.commands.set('$redirect',function(data){
 
@@ -1538,9 +1373,6 @@ Hi.$ui.js.commands.set('$redirect',function(data){
 
 });
 
-
-
-//Executa um commando Hi
 Hi.$ui.js.commands.run = function(key,params){
 
     if(Hi.$ui.js.commands.all.hasOwnProperty(key)){
@@ -1560,18 +1392,24 @@ Hi.$ui.js.setScopeProps = function(context,context_variables){
     var UIRoot = {};
 
     if(context_variables.$root){
-
         UIRoot = context_variables.$root;
-
     }
 
+    if(UIRoot.hasOwnProperty("$dictionary")){
+
+        var dictionary = UIRoot["$dictionary"];
+        for(var key in dictionary){
+            if(dictionary.hasOwnProperty(key))
+                Hi.i18n.dictionary[key] = dictionary[key];
+        }
+
+        delete UIRoot["$dictionary"];
+    }
 
     for(var root_variable_name in UIRoot){
         var root_variable_value = UIRoot[root_variable_name];
         __[root_variable_name]=root_variable_value;
-
     }
-
 
     __['__t']=__t;
 
@@ -2295,7 +2133,6 @@ Hi.$nav.isSameRoute = function(url){
 
 };
 
-//Efectua uma requisicao get de uma rota
 Hi.$nav.requestData = function(route,callback,server_directives){
 
     if(route){
@@ -2309,23 +2146,17 @@ Hi.$nav.requestData = function(route,callback,server_directives){
 
         }
 
-        //Obtem a url da rota
         var route_url = Hi.$nav.getURL(route);
-
         var server_response=false;
 
         var request_params = {};
         server_directives.AJAX_MVC=1;
 
         if(server_directives){
-
             request_params = server_directives;
-
         }
 
         var errorStatus = false;
-
-        //Efectua a requisicao GET
         var request = $.ajax({
 
             url:route_url,
@@ -2340,22 +2171,15 @@ Hi.$nav.requestData = function(route,callback,server_directives){
             error: function(jqXHR ,textStatus,errorThrown){
 
                 if(__.hasOwnProperty("$onRedirectError")){
-
-
                     if(typeof __.$onRedirectError=="function")
                         __.$onRedirectError.call(__,route,jqXHR.status,request);
-
                 }
 
 
                 if(__.hasOwnProperty("$onRedirectFinish")){
-
                     if(typeof __.$onRedirectFinish=="function"){
-
                         __.$onRedirectFinish.call(__,route);
-
                     }
-
                 }
 
                 console.error("controller/action HTTP request failed : "+route_url);
@@ -2396,8 +2220,6 @@ Hi.$nav.resolveRoute = function(param){
 
 
     if(typeof param==='string'){
-
-        //Possui slashes
         if(param.indexOf('/')!==-1){
 
             var lastIndex = param.length-1;
@@ -3031,17 +2853,53 @@ window.onpopstate = function(param){
 };
 
 
-function __t(string,key){
+Hi.i18n = {};
+Hi.i18n.dictionary = {};
+Hi.i18n.get = function(key){
+    if(!Hi.i18n.dictionary.hasOwnProperty(key))
+        return key;
 
-    if(key){
+    return Hi.i18n.dictionary[key];
+};
 
-        return Hi.$ui.js.lang.getItem(key,string);
+Hi.i18n.format = function(key, values){
 
-    }else{
+    key = Hi.i18n.get(key);
 
-        return Hi.$ui.js.lang.getItem(string);
+    for(var  propKey in values){
+        var ngKey = "{{"+propKey+"}}";
+        var propValue = values[propKey];
+        key = key.split(ngKey).join(propValue);
+    }
+
+    return key;
+
+};
+
+
+Hi.i18n.TranslatePromise = function(key){
+
+    this.with = function(values){
+
+        return Hi.i18n.format(key,values);
 
     }
+
+};
+
+
+function translate(key){
+
+    if(key.indexOf("{{")!=-1&&key.indexOf("}}")!=-1)
+        return new Hi.i18n.TranslatePromise(key);
+
+    return Hi.i18n.get(key);
+
+}
+
+function __t(string,key){
+
+    return translate(key);
 
 }
 

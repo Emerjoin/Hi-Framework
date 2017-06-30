@@ -1,9 +1,11 @@
 package org.emerjoin.hi.web.req;
 
+import org.emerjoin.hi.web.FrontEnd;
 import org.emerjoin.hi.web.HiCDI;
 import org.emerjoin.hi.web.RequestContext;
 import org.emerjoin.hi.web.events.ControllerRequestEvent;
 import org.emerjoin.hi.web.exceptions.HiException;
+import org.emerjoin.hi.web.i18n.I18nRuntime;
 import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.mvc.ControllersMapper;
 import org.emerjoin.hi.web.AppContext;
@@ -100,6 +102,9 @@ public class MVCReqHandler extends ReqHandler{
 
     @Inject
     private Event<ControllerRequestEvent> controllerRequestEvent;
+
+    @Inject
+    private FrontEnd frontEnd;
 
     private Logger log;
 
@@ -276,8 +281,20 @@ public class MVCReqHandler extends ReqHandler{
         requestContext.getData().put("action",action);
         requestContext.getData().put("controller",controller);
 
-        if(controllerClass!=null)
-            actionFound = callAction(action,controllerClass, requestContext);
+        try {
+
+            String language = frontEnd.getLanguage();
+            if(I18nRuntime.isReady())
+                I18nRuntime.get().setLanguage(language);
+
+            actionFound = callAction(action, controllerClass, requestContext);
+
+        }finally {
+
+            if(I18nRuntime.isReady())
+                I18nRuntime.get().unsetLanguage();
+
+        }
 
         return actionFound;
 

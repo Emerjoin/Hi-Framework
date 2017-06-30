@@ -6,6 +6,7 @@ import org.emerjoin.hi.web.Helper;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.events.TemplateLoadEvent;
 import org.emerjoin.hi.web.events.TemplateTransformEvent;
+import org.emerjoin.hi.web.i18n.I18nContext;
 import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.mvc.exceptions.ConversionFailedException;
 import org.emerjoin.hi.web.mvc.exceptions.MvcException;
@@ -38,6 +39,9 @@ public class Controller {
 
     @Inject
     private Event<TemplateTransformEvent> templateTransformEvent;
+
+    @Inject
+    private I18nContext i18nContext;
 
     private static Logger _log = Logging.getInstance().getLogger(Controller.class);
 
@@ -121,23 +125,19 @@ public class Controller {
 
     }
 
-    public void callView(Map values) throws NoSuchViewException, TemplateException, ConversionFailedException {
+    public void callView(Map<String,Object> values) throws NoSuchViewException, TemplateException, ConversionFailedException {
         AppConfigurations config = AppConfigurations.get();
         RequestContext requestContext = CDI.current().select(RequestContext.class).get();
 
-
         String actionName = requestContext.getData().get("actionU").toString();
         String controllerName = requestContext.getData().get("controllerU").toString();
-
         String presentationHtmlFile =actionName.toString();
 
         String viewMode = requestContext.getRequest().getParameter("$");
         boolean withViewMode = false;
         if(viewMode!=null && viewMode.trim().length()>0){
-
             presentationHtmlFile = presentationHtmlFile+"."+viewMode;
             withViewMode = true;
-
         }
 
         String viewFile = "/"+config.getViewsDirectory()+"/"+controllerName+"/"+presentationHtmlFile+".html";
@@ -150,8 +150,17 @@ public class Controller {
 
         if(values==null)
             values = new HashMap<>();
+
+        Map<String,Object> templateValues = new HashMap<>();
         if(frontEnd.wasTemplateDataSet())
-            values.put("$root",frontEnd.getTemplateData());
+            templateValues = frontEnd.getTemplateData();
+
+        Map<String,String> i18nExported = i18nContext.collect();
+        if(i18nExported.size()>0)
+            templateValues.put("$dictionary",i18nExported);
+
+        if(templateValues.size()>0)
+            values.put("$root",templateValues);
 
         requestContext.getData().put(VIEW_DATA_KEY,values);
 
@@ -164,7 +173,6 @@ public class Controller {
         prepareView(requestContext,controllerName,actionName,viewFile,viewJSFile,viewJSMiniFile);
         htmLizer.setRequestContext(requestContext);
         htmLizer.process(this,false,withViewMode,viewMode,templateTransformEvent);
-
     }
 
 

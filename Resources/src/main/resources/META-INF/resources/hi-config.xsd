@@ -1,6 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/XML/1.0.0"
-            xmlns:hi="http://hi-framework.org/XML/1.0.0" elementFormDefault="qualified">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/XML/1.1.0"
+            xmlns:hi="http://hi-framework.org/XML/1.1.0" elementFormDefault="qualified">
+
+
+    <xsd:simpleType name="StringWithAtLeast2Letters">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="2"></xsd:minLength>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="i18nLanguageType">
+        <xsd:simpleContent>
+            <xsd:extension base="hi:StringWithAtLeast2Letters">
+                <xsd:attribute name="default" type="xsd:boolean" use="optional"></xsd:attribute>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="i18nLanguagesType">
+        <xsd:sequence>
+            <xsd:element name="language" type="hi:i18nLanguageType" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="i18nDictionariesType">
+        <xsd:sequence>
+            <xsd:element name="dictionary" type="hi:StringWithAtLeast2Letters" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="i18nType">
+        <xsd:all>
+            <xsd:element name="enable-concatenation" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
+            <xsd:element name="dictionaries" type="hi:i18nDictionariesType" maxOccurs="1" minOccurs="1"></xsd:element>
+            <xsd:element name="languages" type="hi:i18nLanguagesType" maxOccurs="1" minOccurs="1"></xsd:element>
+            <xsd:element name="cache" type="hi:StringWithAtLeast2Letters" maxOccurs="1" minOccurs="0"></xsd:element>
+            <xsd:element name="unicode-encoding" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
+        </xsd:all>
+    </xsd:complexType>
 
     <xsd:complexType name="webType">
         <xsd:all maxOccurs="1" minOccurs="1">
@@ -108,7 +146,6 @@
     </xsd:complexType>
 
 
-
     <xsd:complexType name="folderHttpCacheType">
         <xsd:attribute use="required" name="age-unit" type="hi:ageUnitsType"></xsd:attribute>
         <xsd:attribute use="required" name="age" type="hi:ageType"></xsd:attribute>
@@ -153,6 +190,7 @@
             <xsd:element type="xsd:string" name="default-lang" nillable="false" maxOccurs="1" minOccurs="0"></xsd:element>
             <xsd:element type="hi:appModeType" name="deployment-mode" nillable="false" maxOccurs="1" minOccurs="0" ></xsd:element>
             <xsd:element type="hi:webType" name="web" minOccurs="0" nillable="false" maxOccurs="1"></xsd:element>
+            <xsd:element type="hi:i18nType" name="i18n" minOccurs="0" maxOccurs="1" nillable="false"></xsd:element>
             <xsd:element type="hi:tunningType" name="web-tuning" nillable="false" minOccurs="0" maxOccurs="1"></xsd:element>
         </xsd:all>
     </xsd:complexType>

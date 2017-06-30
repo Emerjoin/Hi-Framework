@@ -31,7 +31,7 @@ public class FrontEnd {
 
     private String template;
     private String language;
-    private Map<String,Map> templateData = new HashMap<>();
+    private Map<String,Object> templateData = new HashMap<>();
 
 
     private Logger log = Logging.getInstance().getLogger(FrontEnd.class);
@@ -91,18 +91,16 @@ public class FrontEnd {
     }
 
 
-    public void setTemplateData(Map templateData) {
+    public void setTemplateData(Map<String,Object> templateData) {
         this.templateData = templateData;
     }
 
     public void setLanguage(String name){
-
         this.language = name;
         activeUser.setProperty(LANGUAGE_SESSION_VARIABLE,this.language);
-        //Set reload command if this method is invoked on an ajax request
+        //Set reloadLanguage command if this method is invoked on an ajax request
         if(isRequestAjax()||isFrontierRequest())
-            refresh();
-
+            invokeAfter("reloadLanguage", Collections.emptyMap());
     }
 
     public void setTemplate(String template) {
@@ -145,7 +143,7 @@ public class FrontEnd {
     public Map<String,Map> getLaterInvocations() {
         return laterInvocations;
     }
-    public Map getTemplateData() {
+    public Map<String,Object> getTemplateData() {
         return templateData;
     }
 
