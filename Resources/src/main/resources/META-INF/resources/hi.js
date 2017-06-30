@@ -672,8 +672,7 @@ Hi.$angular.run = function(){
     var directives = new Hi.$angular.directivesDefiner(angularApp);
     directives.define();
 
-
-    angularApp.run(function($rootScope,$compile){
+    var runapp = function($rootScope,$compile){
 
         if(typeof sessionStorage!="undefined"){
 
@@ -764,10 +763,11 @@ Hi.$angular.run = function(){
 
         }
 
-    });
+    };
 
+    runapp.$inject = ["$rootScope","$compile"];
+    angularApp.run(runapp);
     Hi.$angular.app = angularApp;
-
 
 };
 

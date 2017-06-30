@@ -68,7 +68,11 @@ public class ES5Library {
         try {
 
             _log.debug("Reading main client-side code file...");
-            URL res = servletContext.getResource("/hi.js");
+            URL res = servletContext.getResource("/hi.min.js");
+
+            if(AppConfigurations.get().underDevelopment())
+                res = servletContext.getResource("/hi.js");
+
             if(res!=null){
 
                 InputStream inputStream = res.openStream();
