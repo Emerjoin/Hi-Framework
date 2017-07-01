@@ -162,7 +162,7 @@ public class FrontEnd {
 
     public boolean isFrontierRequest(){
 
-        return httpServletRequest.getRequestURL().indexOf("f.m.call")!=-1;
+        return httpServletRequest.getRequestURL().indexOf("jbind:")!=-1;
 
     }
 

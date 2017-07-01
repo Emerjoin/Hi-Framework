@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-@HandleRequests(regexp = "f.m.call/[$_A-Za-z0-9]+/[$_A-Za-z0-9]+", supportPostMethod = true)
+@HandleRequests(regexp = "jbind:[$_A-Za-z0-9=]+", supportPostMethod = true)
 @ApplicationScoped
 public class FrontiersReqHandler extends ReqHandler {
 
@@ -68,6 +68,8 @@ public class FrontiersReqHandler extends ReqHandler {
     private ConfigProvider configProvider;
     private Logger log = null;
     private Gson gson = null;
+
+    private Base64.Decoder decoder = Base64.getDecoder();
 
     { gson = new Gson(); }
 
@@ -240,10 +242,12 @@ public class FrontiersReqHandler extends ReqHandler {
     private String[] getFrontierPair(RequestContext context){
 
         String route = context.getRouteUrl();
-        int firstSlashIndex = route.indexOf('/');
-        int lastSlashIndex = route.lastIndexOf('/');
-        String className = route.substring(firstSlashIndex+1,lastSlashIndex);
-        String methodName = route.substring(lastSlashIndex+1,route.length());
+        route = route.substring(route.indexOf(':')+1,route.length());
+        route = new String(decoder.decode(route));
+
+        int slashIndex = route.indexOf('/');
+        String className = route.substring(0,slashIndex);
+        String methodName = route.substring(slashIndex+1,route.length());
 
         return new String[]{className,methodName};
 
@@ -393,8 +397,9 @@ public class FrontiersReqHandler extends ReqHandler {
             return false;
 
         FrontierClass frontierClass = getFrontier(invokedClass);
-        if(!frontierClass.hasMethod(invokedMethod))
+        if(!frontierClass.hasMethod(invokedMethod)) {
             return false;
+        }
 
         FrontierMethod frontierMethod = frontierClass.getMethod(invokedMethod);
         Map params = matchParams(invokedClass,frontierMethod, requestContext);

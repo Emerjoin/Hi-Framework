@@ -12,15 +12,51 @@ import org.slf4j.Logger;
 import javax.enterprise.inject.spi.CDI;
 import java.lang.annotation.Annotation;
 import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Mario Junior.
  */
 public class FrontiersGenerator {
 
+    private class FrontierFunction{
+
+        private Map<String,String> params = new HashMap<>();
+        private String signature="";
+        private String body = "";
+
+        private void setParam(String name, String value){
+
+            params.put(name,value);
+
+        }
+
+        private String get(String name){
+
+            if(!params.containsKey(name))
+                return "undefined";
+
+            return params.get(name);
+
+        }
+
+        private FrontierFunction(){
+
+            setParam("_$fmut","undefined");
+            setParam("_$abpon","undefined");
+            setParam("_$abpnew","undefined");
+            setParam("_$si_method","undefined");
+            setParam("_$si_params","undefined");
+
+        }
+
+    }
 
     private String genericFrontierJS;
     private Logger log = Logging.getInstance().getLogger(FrontiersGenerator.class);
+    private java.util.Base64.Encoder encoder = Base64.getEncoder();
 
     public FrontiersGenerator(){
 
@@ -30,11 +66,13 @@ public class FrontiersGenerator {
 
     private String generateUrl(String beanName, String method){
 
-        return "f.m.call/"+beanName+"/"+method;
+        return "jbind:"+encoder.encodeToString((beanName+"/"+method).getBytes());
 
     }
 
-    private Object[] generateSignatureAndObject(FrontierMethod method){
+    private FrontierFunction generateSignatureAndObject(FrontierMethod method){
+
+        FrontierFunction function = new FrontierFunction();
 
         StringBuilder signature = new StringBuilder();
         signature.append("(");
@@ -43,7 +81,7 @@ public class FrontiersGenerator {
         java.security.SecureRandom secureRandom = new SecureRandom();
         String token = String.valueOf(secureRandom.nextLong());
 
-        methodBody.append("var params = {};");
+        methodBody.append("var params = {");
         MethodParam[] parameters = method.getParams();
 
         int index = 0;
@@ -51,84 +89,99 @@ public class FrontiersGenerator {
 
             String paramName = parameter.getName();
             signature.append(paramName);
-            methodBody.append("params."+paramName+"="+paramName+";");
+            methodBody.append("\""+paramName+"\":"+paramName);
             //Not last item
-            if(index!=parameters.length-1)
+            if(index!=parameters.length-1) {
                 signature.append(",");
+                methodBody.append(",");
+            }
             index++;
 
         }
 
+        methodBody.append("};");
         signature.append(")");
+        function.signature = signature.toString();
+        function.body = methodBody.toString();
 
         Annotation mInvocations = method.getMethod().getAnnotation(MultipleCalls.class);
         if(mInvocations!=null){
-            methodBody.append("var _$fmut = \""+token+"\";");
-            methodBody.append("var _$mi=true;");
-            methodBody.append("var _$si=false;");
+            function.setParam("_$fmut","\""+token+"\"");
+            function.setParam("_$mi","true");
+            function.setParam("_$si","false");
 
-        }else handleSingleInvocation(token,methodBody,method);
-
-        return new Object[]{signature.toString(),methodBody.toString()};
+        }else handleSingleInvocation(token,function,method);
+        return function;
 
     }
 
-    private void handleSingleInvocation(String token, StringBuilder methodBody, FrontierMethod method ){
+    private void handleSingleInvocation(String token, FrontierFunction function, FrontierMethod method ){
 
         Annotation sInvocation = method.getMethod().getAnnotation(SingleCall.class);
-        methodBody.append("var _$si=true;");
-        methodBody.append("var _$mi=false;");
+        function.setParam("_$si","true");
+        function.setParam("_$mi","false");
 
         if(sInvocation!=null){
             SingleCall singleCall = (SingleCall) sInvocation;
 
             if(singleCall.detectionMethod()== SingleCall.Detection.METHOD_CALL){
-                methodBody.append("var _$fmut = \""+token+"\";");
-                methodBody.append("var _$si_method = true;");
-                methodBody.append("var _$si_params = false;");
+                function.setParam("_$fmut","\""+token+"\"");
+                function.setParam("_$si_method","true");
+                function.setParam("_$si_params","false");
             }else{
-                methodBody.append("var _$fmut = \""+token+"\"+JSON.stringify(params).trim();");
-                methodBody.append("var _$si_params = true;");
-                methodBody.append("var _$si_method = false;");
+                function.setParam("_$fmut","\""+token+"\"+JSON.stringify(params).trim();");
+                function.setParam("_$si_params","true");
+                function.setParam("_$si_method","false");
+                function.setParam("_$si_params","true");
+                function.setParam("_$si_method","false");
             }
 
             if(singleCall.abortionPolicy()== SingleCall.AbortPolicy.ABORT_NEW_INVOCATION){
-                methodBody.append("var _$abpnew = true;");
-                methodBody.append("var _$abpon = false;");
+                function.setParam("_$abpnew","true");
+                function.setParam("_$abpon","false");
             }else{
-                methodBody.append("var _$abpnew = false;");
-                methodBody.append("var _$abpon = true;");
+                function.setParam("_$abpnew","false");
+                function.setParam("_$abpon","true");
             }
 
         }else{
 
-            methodBody.append("var _$fmut = \""+token+"\";");
-            methodBody.append("var _$abpon = true;");
-            methodBody.append("var _$abpnew = false;");
-            methodBody.append("var _$si_method = true;");
-            methodBody.append("var _$si_params = false;");
-
+            function.setParam("_$fmut","\""+token+"\"");
+            function.setParam("_$abpon","true");
+            function.setParam("_$abpnew","false");
+            function.setParam("_$si_method","true");
+            function.setParam("_$si_params","false");
         }
 
     }
 
     private String generateMethodMirror(FrontierMethod method,String beanName){
 
-        Object[] signatureAndData = generateSignatureAndObject(method);
-        String signature = signatureAndData[0].toString();
-        String data = signatureAndData[1].toString();
+        FrontierFunction function = generateSignatureAndObject(method);
+        function.setParam("$functionUrl","App.base_url+\""+generateUrl(beanName,method.getName())+"\"");
 
-        StringBuilder mirror = new StringBuilder();
-        mirror.append("function "+signature+"{");
-        mirror.append(data);
-        mirror.append("var $functionUrl=App.base_url+\""+generateUrl(beanName,method.getName())+"\";");
-        mirror.append(genericFrontierJS);
-        mirror.append("};");
+        StringBuilder code = new StringBuilder();
+        code.append("function "+function.signature+"{");
+        code.append(function.body);
+        code.append(generateWrapper(function));
+        code.append("};");
 
-        return mirror.toString();
+        return code.toString();
 
     }
 
+    private String generateWrapper(FrontierFunction f){
+
+        return String.format("return fMx(%s,%s,%s,%s,%s,%s,%s);",
+                "params",
+                f.get("$functionUrl"),
+                f.get("_$fmut"),
+                f.get("_$si"),
+                f.get("_$si_method"),
+                f.get("_$abpon"),
+                "arguments");
+
+    }
 
     private void ready(){
 
