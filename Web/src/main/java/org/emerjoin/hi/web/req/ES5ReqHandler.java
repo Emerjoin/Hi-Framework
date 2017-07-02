@@ -76,12 +76,13 @@ public class ES5ReqHandler extends ReqHandler {
 
     private void es5File(String templateContent){
 
-        requestContext.getResponse().setHeader("Content-Type", "text/javascript");
-
-        if(!AppConfigurations.get().underDevelopment())
+        if(!AppConfigurations.get().underDevelopment()) {
             AppConfigurations.get().getTunings().emmitSmartCachingHeaders(requestContext);
-        else
+        } else {
             requestContext.getResponse().setHeader("Cache-Control", "no-cache");
+        }
+
+        requestContext.getResponse().setHeader("Content-Type", "text/javascript");
 
         String toReplace = "//{{config}}";
         String hiJs = getHiJs(requestContext);
@@ -206,7 +207,8 @@ public class ES5ReqHandler extends ReqHandler {
         String requestURL = requestContext.getRequest().getRequestURI().replace(requestContext.getRequest().getContextPath() + "/", "");
         int indexOfLastSlash = requestURL.lastIndexOf('/');
 
-        String templateName = (String) activeUser.getProperty(FrontEnd.TEMPLATE_SESSION_VARIABLE, "index");
+        String templateName = (String) activeUser.getProperty(FrontEnd.TEMPLATE_SESSION_VARIABLE,
+                AppConfigurations.get().getDefaultTemplate());
         String templateContent = getTemplateController(templateName);
 
         if (indexOfLastSlash != -1)
@@ -214,7 +216,8 @@ public class ES5ReqHandler extends ReqHandler {
 
         String es5File = "hi-es5.js";
         if (AppConfigurations.get().getDeploymentMode() != AppConfigurations.DeploymentMode.DEVELOPMENT)
-            es5File = "hi-es5" + appContext.getAssetVersionToken() + ".js";
+            es5File = "hi-es5-" +templateName+ appContext.getAssetVersionToken()+ ".js";
+
 
         if (requestURL.equals(es5File)){
             es5File(templateContent);

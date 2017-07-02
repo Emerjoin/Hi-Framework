@@ -103,7 +103,9 @@ public class Tunings {
 
     }
 
-    public String applySmartCaching(String markup, boolean partialDocument){
+
+
+    public String applySmartCaching(String markup, boolean partialDocument,String templateName){
 
         if(AppConfigurations.get().getDeploymentMode()== AppConfigurations.DeploymentMode.DEVELOPMENT)
             return markup;
@@ -112,8 +114,11 @@ public class Tunings {
         Document document = null;
         if(partialDocument)
             document = Jsoup.parseBodyFragment(markup);
-        else
-            document = Jsoup.parse(markup.replace("hi-es5.js",getCachedPath("hi-es5.js",appContext)));
+        else {
+            String es5WithTemplateName = "hi-es5-"+templateName+".js";
+            String cachedPath = getCachedPath(es5WithTemplateName, appContext);
+            document = Jsoup.parse(markup.replace("hi-es5.js", cachedPath));
+        }
 
         String imgFindFormat = "img[src^=webroot/%s]";
         String imgAloadFindFormat = "img[aload^=webroot/%s]";

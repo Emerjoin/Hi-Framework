@@ -83,7 +83,7 @@ public class HTMLizer {
 
         TemplateTransformEvent templateTransformEvent = new TemplateTransformEvent(templateName,templateFileContent);
         transformEvent.fire(templateTransformEvent);
-        templateFileContent = AppConfigurations.get().getTunings().applySmartCaching(templateTransformEvent.getTemplate().getMarkup(),false);
+        templateFileContent = AppConfigurations.get().getTunings().applySmartCaching(templateTransformEvent.getTemplate().getMarkup(),false,templateName);
 
 
         return templateFileContent;
@@ -369,7 +369,7 @@ public class HTMLizer {
         if(requestContext.getData().containsKey("view_content")){
             viewHTML = requestContext.getData().get("view_content").toString();
             if(viewHTML!=null&&!AppConfigurations.get().underDevelopment())
-                viewHTML = AppConfigurations.get().getTunings().applySmartCaching(viewHTML, true);
+                viewHTML = AppConfigurations.get().getTunings().applySmartCaching(viewHTML, true,null);
 
         }
 
