@@ -3091,8 +3091,6 @@ var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fa
             delete $fiis[_$fmut];
         }
 
-        //,timeout: 0 TODO: Set the timeout according to Maximum expected call duration
-
     };
 
     ajaxParams.method = "POST";
