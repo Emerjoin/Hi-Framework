@@ -151,17 +151,6 @@ public class Controller {
         if(values==null)
             values = new HashMap<>();
 
-        Map<String,Object> templateValues = new HashMap<>();
-        if(frontEnd.wasTemplateDataSet())
-            templateValues = frontEnd.getTemplateData();
-
-        Map<String,String> i18nExported = i18nContext.collect();
-        if(i18nExported.size()>0)
-            templateValues.put("$dictionary",i18nExported);
-
-        if(templateValues.size()>0)
-            values.put("$root",templateValues);
-
         requestContext.getData().put(VIEW_DATA_KEY,values);
 
         //Do not need to load the view file
@@ -172,7 +161,9 @@ public class Controller {
 
         prepareView(requestContext,controllerName,actionName,viewFile,viewJSFile,viewJSMiniFile);
         htmLizer.setRequestContext(requestContext);
+        htmLizer.setI18nContext(i18nContext);
         htmLizer.process(this,false,withViewMode,viewMode,templateTransformEvent);
+
     }
 
 

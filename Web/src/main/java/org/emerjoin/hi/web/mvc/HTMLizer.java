@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.emerjoin.hi.web.AppContext;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.events.TemplateTransformEvent;
+import org.emerjoin.hi.web.i18n.I18nContext;
 import org.emerjoin.hi.web.i18n.I18nRuntime;
 import org.emerjoin.hi.web.internal.ES5Library;
 import org.emerjoin.hi.web.mvc.exceptions.ConversionFailedException;
@@ -38,6 +39,7 @@ public class HTMLizer {
 
     private GsonBuilder gsonBuilder = null;
     private RequestContext requestContext = null;
+    private I18nContext i18nContext = null;
     private ActiveUser activeUser = null;
     private Map<String,String> cachedTemplates = Collections.synchronizedMap(new HashMap<>());
 
@@ -348,79 +350,102 @@ public class HTMLizer {
         CharSequence headCloseTag = "</head>";
         CharSequence headClosedScript = "</head>"+makeJavascript(loadedJSContent);
         template = template.replace(headCloseTag,headClosedScript);
-
         return template;
 
     }
 
     public String process(Controller controller, boolean ignoreView,
                           boolean withViewMode, String viewMode, Event<TemplateTransformEvent> transformEvent) throws TemplateException, ConversionFailedException {
-
         requestContext.getResponse().setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         FrontEnd frontEnd = CDI.current().select(FrontEnd.class).get();
         ES5Library es5Lib = CDI.current().select(ES5Library.class).get();
-
         String template = fetchTemplate(frontEnd,transformEvent);
         String loaderJSContent= es5Lib.getHiLoaderJS();
-
-        Map viewData = (Map) requestContext.getData().get(Controller.VIEW_DATA_KEY);
+        Map<String,Object> viewData = (Map<String,Object>) requestContext.getData().get(Controller.VIEW_DATA_KEY);
 
         String viewHTML = null;
         if(requestContext.getData().containsKey("view_content")){
             viewHTML = requestContext.getData().get("view_content").toString();
             if(viewHTML!=null&&!AppConfigurations.get().underDevelopment())
                 viewHTML = AppConfigurations.get().getTunings().applySmartCaching(viewHTML, true,null);
-
         }
 
-
         if(viewHTML!=null){
-
              if(I18nRuntime.isReady()){
-
                  String viewId = requestContext.getData().get("controllerU").toString()+":"+requestContext.getData().get("actionU").toString();
                  if(withViewMode)
                      viewId+=viewMode;
-
                  I18nRuntime i18n = I18nRuntime.get();
                  viewHTML = i18n.translateView(viewId,viewHTML);
-
              }
-
         }
 
-        Map route = new HashMap();
+        Map<String,Object> route = new HashMap<>();
         route.put("controller", requestContext.getData().get("controllerU").toString());
         route.put("action", requestContext.getData().get("actionU").toString());
-        
         if(withViewMode)
             route.put("mode",viewMode);
-        else
-            route.put("mode",withViewMode);
+        else route.put("mode",false);
 
-        /* AJAX REQUEST */
-        if(requestContext.hasAjaxHeader())
-            return ajaxProcess(frontEnd,viewHTML,viewData,route,controller);
+        if(!viewData.containsKey(TEMPLATE_DATA_KEY))
+            viewData.put("$root", new HashMap<>());
+        Map $templateDataMap = (Map) viewData.get("$root");
+        viewData.put("$root",$templateDataMap);
 
-        if(requestContext.isUserLogged()){
+        String mappedPath = "/"+requestContext.getRouteUrl();
+        if(requestContext.getRequest().getHeader("Ignore-i18nMapping")==null){
 
-            if(!viewData.containsKey(TEMPLATE_DATA_KEY))
-                viewData.put("$root", new HashMap<>());
+            if(I18nRuntime.isReady()){
 
-            Map $templateDataMap = (Map) viewData.get("$root");
-            viewData.put("$root",$templateDataMap);
+                I18nRuntime runtime = I18nRuntime.get();
+                if(runtime.getConfiguration().isMappingsEnabled()) {
+                    //Export the dictionary mapped to the current route
+
+                    if (runtime.hasDictionary(mappedPath)) {
+                        _log.debug(String.format("Exporting language dictionaries mapped to path : [%s]",mappedPath));
+                        Map<String,String> dictionary = runtime.getDictionary(mappedPath);
+                        viewData.put("$dictionary", dictionary);
+                    }else{
+
+                        _log.warn(String.format("No dictionary mapped to path [%s]",mappedPath));
+
+                    }
+
+                }else{
+
+                    Map<String,String> dictionary = i18nContext.collect();
+                    if(dictionary.size()>0){
+                        _log.debug(String.format("Exporting %d dictionary terms",dictionary.size()));
+                        viewData.put("$dictionary", dictionary);
+                        viewData.put("$dictionary-no-cache",true);
+                    }
+
+                }
+            }
+
+        }else{
+
+            _log.debug(String.format("Ignoring I18N Mappings for [%s]",mappedPath));
 
         }
 
-        /* NORMAL REQUEST */
+
+        if(requestContext.hasAjaxHeader()) /* AJAX REQUEST */
+            return ajaxProcess(frontEnd,viewHTML,viewData,route,controller);
         return normalProcess(frontEnd,viewHTML,viewData,
-                route,controller,loaderJSContent,template);
+                route,controller,loaderJSContent,template); /* NORMAL REQUEST */
 
     }
 
     public void setRequestContext(RequestContext requestContext){
 
         this.requestContext = requestContext;
+
+    }
+
+    public void setI18nContext(I18nContext i18nContext){
+
+        this.i18nContext = i18nContext;
 
     }
 

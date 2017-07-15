@@ -2,7 +2,6 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/XML/1.1.0"
             xmlns:hi="http://hi-framework.org/XML/1.1.0" elementFormDefault="qualified">
 
-
     <xsd:simpleType name="StringWithAtLeast2Letters">
         <xsd:restriction base="xsd:string">
             <xsd:minLength value="2"></xsd:minLength>
@@ -33,10 +32,12 @@
     <xsd:complexType name="i18nType">
         <xsd:all>
             <xsd:element name="enable-concatenation" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
-            <xsd:element name="dictionaries" type="hi:i18nDictionariesType" maxOccurs="1" minOccurs="1"></xsd:element>
+            <xsd:element name="dictionaries" type="hi:i18nDictionariesType" maxOccurs="1" minOccurs="0"></xsd:element>
             <xsd:element name="languages" type="hi:i18nLanguagesType" maxOccurs="1" minOccurs="1"></xsd:element>
             <xsd:element name="cache" type="hi:StringWithAtLeast2Letters" maxOccurs="1" minOccurs="0"></xsd:element>
             <xsd:element name="unicode-encoding" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
+            <xsd:element name="disable-full-bundle-exportation" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
+            <xsd:element name="enable-mappings" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
         </xsd:all>
     </xsd:complexType>
 

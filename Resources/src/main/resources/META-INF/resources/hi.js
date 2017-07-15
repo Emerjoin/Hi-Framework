@@ -684,31 +684,38 @@ Hi.$angular.run = function(){
             }else {
 
                 var oldDeployId = false;
-                if (sessionStorage.hasOwnProperty("hiDeployId_"))
-                    oldDeployId = sessionStorage["hiDeployId_"];
-                else
+                if (sessionStorage.hasOwnProperty("deploy-id-"+App.base_url))
+                    oldDeployId = sessionStorage["deploy-id-"+App.base_url];
+                else{
+
                     Hi.$ui.html.cache.destroy();
+                    Hi.i18n.cache.destroy();
+
+                }
+
 
 
                 if (oldDeployId) {
 
                     //Not the same deploy Id
-                    if (oldDeployId != App.deployId)
+                    if (oldDeployId != App.deployId) {
                         Hi.$ui.html.cache.destroy();
+                        Hi.i18n.cache.destroy();
+                    }
 
                 }
 
-                sessionStorage["hiDeployId_"] = App.deployId;
+                sessionStorage["deploy-id-"+App.base_url] = App.deployId;
 
                 if (App.deployMode == "DEVELOPMENT")
                     Hi.$ui.html.cache.on = false;
-
-                Hi.setLanguage(appLang);
 
             }
 
 
         }
+
+        Hi.i18n.init();
 
         Hi.$angular.$injector =  angular.injector(modulesInjected);
         Hi.$angular.$compile = $compile;
@@ -737,6 +744,7 @@ Hi.$angular.run = function(){
 
 
         Hi.$angular.$injector =  angular.injector(["app"].concat(modulesInjected));
+
 
         //App is not under tests
         if(typeof App!="undefined") {
@@ -768,6 +776,7 @@ Hi.$angular.run = function(){
     runapp.$inject = ["$rootScope","$compile"];
     angularApp.run(runapp);
     Hi.$angular.app = angularApp;
+
 
 };
 
@@ -851,7 +860,7 @@ Hi.$ui.html.prepareView = function(route_name_or_object){
 
 Hi.$ui.html.cache.getStorageKey = function(){
 
-    return "_hi_views_"+App.base_url;
+    return "hi-app-views-"+App.base_url;
 
 };
 
@@ -1081,9 +1090,6 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
 
 
     }else{
-
-        //if(__.hasOwnProperty("$dictionary"))
-        //    Hi.i18n.dictionary = __["$dictionary"];
 
         if(!__.$startedUp&&__.hasOwnProperty("$startup")){
 
@@ -1361,6 +1367,7 @@ Hi.$ui.js.commands.set('$url',function(data){
 Hi.$ui.js.commands.set("$reloadLanguage",function(data){
 
     Hi.$ui.html.cache.destroy();
+    Hi.i18n.cache.destroy();
     document.location.reload();
 
 });
@@ -1395,15 +1402,16 @@ Hi.$ui.js.setScopeProps = function(context,context_variables){
         UIRoot = context_variables.$root;
     }
 
-    if(UIRoot.hasOwnProperty("$dictionary")){
+    if(context_variables.hasOwnProperty("$dictionary")){
 
-        var dictionary = UIRoot["$dictionary"];
+        var dictionary = context_variables["$dictionary"];
         for(var key in dictionary){
             if(dictionary.hasOwnProperty(key))
                 Hi.i18n.dictionary[key] = dictionary[key];
         }
 
-        delete UIRoot["$dictionary"];
+        delete context_variables["$dictionary"];
+        delete context_variables["$dictionary-no-cache"];
     }
 
     for(var root_variable_name in UIRoot){
@@ -1424,29 +1432,6 @@ Hi.$ui.js.setScopeProps = function(context,context_variables){
 
 };
 
-
-//I18n Support
-Hi.$ui.js.lang = {};
-Hi.$ui.js.lang.dict = {};
-Hi.$ui.js.lang.getItem = function(key,default_value){
-
-    if((typeof Hi.$ui.js.lang.dict[key] !=undefined) && (Hi.$ui.js.lang.dict[key] != false) && Hi.$ui.js.lang.dict[key]!=undefined  ){
-
-        return Hi.$ui.js.lang.dict[key];
-
-    }
-
-    if(default_value){
-
-        return default_value;
-
-    }else{
-
-        return key;
-
-    }
-
-};
 
 Hi.$ui.js.root = {};
 
@@ -1876,15 +1861,18 @@ Hi.$nav.navigateTo = function(route_name_or_object,getParams,embed,callback,$emb
 
         //A view esta na cache
         if(Hi.$ui.html.cache.stores(cachingURL)){
-
             cached_view = Hi.$ui.html.cache.fetch(cachingURL);
-            server_directives = {'Ignore-View':'true'};
-
+            server_directives ['Ignore-View'] = 'true';
         }
 
         if(Hi.$ui.js.wasControllerLoaded(route_object.controller,route_object.action)){
-
             server_directives["Ignore-Js"] = 'true';
+        }
+
+
+        if(Hi.i18n.cache.hasDictionary(cachingURL)){
+
+            server_directives["Ignore-i18nMapping"] = 'true';
 
         }
 
@@ -1922,6 +1910,12 @@ Hi.$nav.navigateTo = function(route_name_or_object,getParams,embed,callback,$emb
             }
 
             var context_variables = server_response.data;
+
+            if(context_variables.hasOwnProperty("$dictionary")&&!context_variables.hasOwnProperty("$dictionary-no-cache")){
+
+                Hi.i18n.cache.put(cachingURL,context_variables["$dictionary"]);
+
+            }
 
             //Commands to be executed on the client-side
             if(context_variables.hasOwnProperty('$invoke')){
@@ -2797,14 +2791,6 @@ Hi.view = function(controller){
 };
 
 
-Hi.setLanguage = function(dictionary){
-
-    Hi.$ui.js.lang.dict = dictionary;
-
-};
-
-
-
 String.prototype.startsWith = function(str){
     return this.indexOf(str)===0;
 };
@@ -2852,9 +2838,89 @@ window.onpopstate = function(param){
 
 };
 
-
+//Internationalization
 Hi.i18n = {};
 Hi.i18n.dictionary = {};
+Hi.i18n.cache = {};
+Hi.i18n.cache.key = "";
+Hi.i18n.cache.get = function(){
+
+    if(typeof localStorage!="undefined"){
+        if(!localStorage.hasOwnProperty(Hi.i18n.cache.key))
+            return {$zero:true};
+        return JSON.parse(localStorage[Hi.i18n.cache.key]);
+
+    }
+
+    return {$zero:true};
+};
+
+
+Hi.i18n.cache.hasDictionary = function(name){
+
+    return Hi.i18n.cache.get().hasOwnProperty(name);
+
+};
+
+Hi.i18n.cache.put = function(name,dictionary){
+    var cache = Hi.i18n.cache.get();
+    cache[name] = dictionary;
+    Hi.i18n.cache.update(cache);
+};
+
+Hi.i18n.cache.update = function(cache){
+
+    if(typeof App == "undefined")
+        return;
+
+    if(App.deployMode == "DEVELOPMENT")
+        return;
+
+    if(cache.hasOwnProperty("$zero"))
+        delete cache["$zero"];
+
+    if(typeof localStorage!="undefined"){
+        localStorage[Hi.i18n.cache.key] = JSON.stringify(cache);
+    }
+
+};
+
+Hi.i18n.cache.load = function(){
+
+    Hi.i18n.dictionary = Hi.i18n.cache.get();
+
+};
+
+Hi.i18n.cache.destroy = function(){
+    if(typeof localStorage!="undefined"){
+        if(!localStorage.hasOwnProperty(Hi.i18n.cache.key))
+            return;
+        delete localStorage[Hi.i18n.cache.key];
+    }
+};
+
+Hi.i18n.init = function(){
+
+    Hi.i18n.cache.key = "i18n-"+App.base_url;
+    var cache =  Hi.i18n.cache.get();
+    if(cache.hasOwnProperty("$zero")){
+
+        if(typeof $i18nTemplateBundle!="undefined"){
+            Hi.i18n.dictionary = $i18nTemplateBundle;
+        }
+
+        if(typeof $i18nBundle !="undefined"){
+            Hi.i18n.dictionary = $i18nBundle;
+        }
+
+    }else{
+
+        Hi.i18n.dictionary = cache;
+
+    }
+
+};
+
 Hi.i18n.get = function(key){
     if(!Hi.i18n.dictionary.hasOwnProperty(key))
         return key;

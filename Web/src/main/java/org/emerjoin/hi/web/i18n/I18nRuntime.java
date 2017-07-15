@@ -19,6 +19,7 @@ public class I18nRuntime {
     private I18nCache cache = null;
     private DOMTranslator DOMTranslator = null;
     private boolean underDevelopment = false;
+    private I18nConfiguration configuration;
 
     private I18nRuntime(){
 
@@ -50,6 +51,7 @@ public class I18nRuntime {
         instance.bundles = i18NStarter.getBundles();
         instance.cache = i18NStarter.getI18nCache();
         instance.underDevelopment  = configurations.underDevelopment();
+        instance.configuration = i18NStarter.getConfiguration();
 
 
     }
@@ -141,11 +143,19 @@ public class I18nRuntime {
 
         LanguageBundle bundle = currentBundle.get();
         if(!bundle.hasDictionary(name))
-            throw new UnrecognizedLanguageException(name);
+            throw new UnknownDictionaryException(name);
 
         return  bundle.getDictionary(name);
 
     }
+
+    public boolean hasDictionary(String name){
+
+        return currentBundle.get().hasDictionary(name);
+
+    }
+
+
 
     public String translate(String string){
 
@@ -165,6 +175,12 @@ public class I18nRuntime {
 
         checkLanguageSet();
         return currentBundle.get();
+
+    }
+
+    public I18nConfiguration getConfiguration(){
+
+        return this.configuration;
 
     }
 

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/i18n/XML/1.0.0"
+            xmlns:i18n="http://hi-framework.org/i18n/XML/1.0.0" elementFormDefault="qualified">
+
+    <xsd:simpleType name="notEmptyString">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"></xsd:minLength>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="templateNameType">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="2"></xsd:minLength>
+            <xsd:pattern value="[A-Za-z]+"></xsd:pattern>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="templateMappingSetType">
+        <xsd:sequence>
+            <xsd:element name="dictionary-file" type="i18n:notEmptyString" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="for" type="i18n:templateNameType"></xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="templatesMappingsType">
+        <xsd:sequence>
+            <xsd:element name="set" type="i18n:templateMappingSetType" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="viewsMappingsType">
+        <xsd:sequence>
+            <xsd:element name="set" type="i18n:viewMappingSetType" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="viewMappingSetType">
+        <xsd:sequence>
+            <xsd:element name="dictionary-file" type="i18n:notEmptyString" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="for" type="i18n:notEmptyString"></xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="mappingsType">
+        <xsd:all>
+            <xsd:element name="templates-mappings" type="i18n:templatesMappingsType" maxOccurs="1" minOccurs="0"/>
+            <xsd:element name="views-mappings" type="i18n:viewsMappingsType" maxOccurs="1" minOccurs="0"/>
+        </xsd:all>
+    </xsd:complexType>
+
+    <xsd:element name="mappings" type="i18n:mappingsType"></xsd:element>
+
+</xsd:schema>

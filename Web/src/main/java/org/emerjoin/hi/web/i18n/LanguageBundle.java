@@ -33,6 +33,12 @@ public class LanguageBundle {
 
     }
 
+    protected void addDictionaries(I18nMappingsInfo info,I18nConfiguration configuration){
+
+        this.dictionaries.putAll(info.buildDictionaries(configuration));
+
+    }
+
     public Map<String,String> getDictionary(String name){
 
         if(name==null||name.isEmpty())
@@ -70,6 +76,20 @@ public class LanguageBundle {
     public String getLang(){
 
         return lang;
+
+    }
+
+    public Map<String,String> export(){
+
+        Map<String,String> dictionary = new HashMap<>();
+        dictionaries.forEach((k,v) -> dictionary.putAll(v));
+        return dictionary;
+
+    }
+
+    public String toString(){
+
+        return dictionaries.toString();
 
     }
 

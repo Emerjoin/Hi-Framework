@@ -3,7 +3,7 @@ package org.emerjoin.hi.web.boot;
 import org.emerjoin.hi.web.BootstrapUtils;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.ConfigProvider;
-import org.emerjoin.hi.web.config.xml.sections.I18nConfig;
+import org.emerjoin.hi.web.i18n.I18nXmlConfig;
 import org.emerjoin.hi.web.exceptions.HiException;
 import org.emerjoin.hi.web.i18n.I18nStarter;
 import org.emerjoin.hi.web.i18n.I18nConfiguration;
@@ -191,7 +191,7 @@ public class BootAgent {
 
     private void initI18n(){
 
-        Optional<I18nConfiguration> configuration = I18nConfig.getConfiguration();
+        Optional<I18nConfiguration> configuration = I18nXmlConfig.getConfiguration();
         if(!configuration.isPresent()) {
             _log.info("I18n not enabled. Skipping");
             return;
@@ -199,7 +199,7 @@ public class BootAgent {
 
         _log.info("I18n enabled. Initializing...");
         Set<URL> libraries = BootstrapUtils.getLibraries(servletContext);
-        I18nStarter i18NStarter = new I18nStarter(configuration.get(),Optional.of(libraries),servletContext);
+        I18nStarter i18NStarter = new I18nStarter(configuration.get(),libraries,servletContext);
         i18NStarter.start();
 
 

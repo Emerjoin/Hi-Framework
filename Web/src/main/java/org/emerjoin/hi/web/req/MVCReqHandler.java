@@ -254,7 +254,6 @@ public class MVCReqHandler extends ReqHandler{
 
     public boolean handle(RequestContext requestContext) throws ServletException, IOException {
         this.requestContext = requestContext;
-
         String mvcUrl = requestContext.getRouteUrl();
         int indexSlash = mvcUrl.indexOf('/');
         if(indexSlash==-1)
@@ -263,12 +262,10 @@ public class MVCReqHandler extends ReqHandler{
         String controller = mvcUrl.substring(0,indexSlash);
         requestContext.getData().put("controllerU",controller);
         controller = getControllerClassFromURLPart(controller);
-
         String action;
         if(indexSlash==mvcUrl.length())
             action = "index";
-        else
-            action = mvcUrl.substring(indexSlash+1,mvcUrl.length());
+        else action = mvcUrl.substring(indexSlash+1,mvcUrl.length());
 
         requestContext.getData().put("actionU",action);
         action = getActionMethodFromURLPart(action);
@@ -277,7 +274,6 @@ public class MVCReqHandler extends ReqHandler{
             return false;
 
         boolean actionFound = false;
-
         requestContext.getData().put("action",action);
         requestContext.getData().put("controller",controller);
 
