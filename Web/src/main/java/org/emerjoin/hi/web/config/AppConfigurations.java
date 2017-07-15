@@ -23,6 +23,7 @@ public class AppConfigurations {
     private Map<String,Boolean> testFiles = new HashMap<>();
     private String defaultLanguage = "default";
     private String defaultTemplate = "index";
+    private long frontiersTimeout = 0;
 
     private Map<String,String> testedViews = new HashMap<>();
 
@@ -175,4 +176,11 @@ public class AppConfigurations {
 
     }
 
+    public long getFrontiersTimeout() {
+        return frontiersTimeout;
+    }
+
+    public void setFrontiersTimeout(long frontiersTimeout) {
+        this.frontiersTimeout = frontiersTimeout;
+    }
 }

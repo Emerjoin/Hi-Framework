@@ -4,6 +4,7 @@ import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.BadConfigException;
 import org.emerjoin.hi.web.config.Configurator;
 import org.emerjoin.hi.web.config.xml.ConfigSection;
+import org.emerjoin.xmleasy.XMLEasy;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -16,6 +17,7 @@ import java.util.Map;
 public class WebConfig implements Configurator {
 
     public static final String DEFAULT_VIEWS_DIRECTORY = "views";
+    private static final String FRONTIERS_TIMEOUT_ELEMENT="default-frontiers-timeout";
 
 
     private void templates(Element webElement, AppConfigurations configs){
@@ -63,6 +65,9 @@ public class WebConfig implements Configurator {
 
         //Template and MVC Configurations
         org.w3c.dom.Element webElement = (org.w3c.dom.Element) docElement.getElementsByTagName("web").item(0);
+        XMLEasy.easy(webElement).ifChild(FRONTIERS_TIMEOUT_ELEMENT)
+                .then((el) -> configs.setFrontiersTimeout(Long.parseLong(el.getContent()))).eval();
+
         NodeList viewsDirectoryNodes = webElement.getElementsByTagName("views-directory");
         if(viewsDirectoryNodes.getLength()>0){
             org.w3c.dom.Element viewsDirectoryElement =(org.w3c.dom.Element) viewsDirectoryNodes.item(0);

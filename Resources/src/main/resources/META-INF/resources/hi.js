@@ -2970,7 +2970,7 @@ function __t(string,key){
 }
 
 var $fiis = {};
-var fMx = function(params,$functionUrl,_$fmut,_$si,_$si_method,_$abpon,fargs) {
+var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fargs) {
 
     var withUploads = false;
 
@@ -3017,7 +3017,6 @@ var fMx = function(params,$functionUrl,_$fmut,_$si,_$si_method,_$abpon,fargs) {
     }
 
     var ajaxParams = {
-
         success: function (data) {
 
             if (data.hasOwnProperty("$invoke")) {
@@ -3101,6 +3100,7 @@ var fMx = function(params,$functionUrl,_$fmut,_$si,_$si_method,_$abpon,fargs) {
     ajaxParams.headers = {csrfToken: App.csrfToken};
     ajaxParams.dataType = "json";
     ajaxParams.cache = false;
+    ajaxParams.timeout = _$tout;
 
     if (!withUploads) {
 

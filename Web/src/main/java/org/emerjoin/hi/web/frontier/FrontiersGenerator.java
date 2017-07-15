@@ -1,5 +1,7 @@
 package org.emerjoin.hi.web.frontier;
 
+import org.emerjoin.hi.web.config.AppConfigurations;
+import org.emerjoin.hi.web.exceptions.HiException;
 import org.emerjoin.hi.web.internal.ES5Library;
 import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.meta.MultipleCalls;
@@ -7,7 +9,9 @@ import org.emerjoin.hi.web.meta.SingleCall;
 import org.emerjoin.hi.web.frontier.model.FrontierClass;
 import org.emerjoin.hi.web.frontier.model.FrontierMethod;
 import org.emerjoin.hi.web.frontier.model.MethodParam;
+import org.emerjoin.hi.web.meta.Timeout;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.spi.CDI;
 import java.lang.annotation.Annotation;
@@ -54,15 +58,8 @@ public class FrontiersGenerator {
 
     }
 
-    private String genericFrontierJS;
-    private Logger log = Logging.getInstance().getLogger(FrontiersGenerator.class);
+    private static Logger log = LoggerFactory.getLogger(FrontiersGenerator.class);
     private java.util.Base64.Encoder encoder = Base64.getEncoder();
-
-    public FrontiersGenerator(){
-
-        ready();
-
-    }
 
     private String generateUrl(String beanName, String method){
 
@@ -81,7 +78,18 @@ public class FrontiersGenerator {
         java.security.SecureRandom secureRandom = new SecureRandom();
         String token = String.valueOf(secureRandom.nextLong());
 
-        methodBody.append("var params = {");
+        Timeout timeout = method.getMethod().getDeclaredAnnotation(Timeout.class);
+        long timeoutValue = AppConfigurations.get().getFrontiersTimeout();
+        if(timeout!=null){
+            if(timeout.value()<0){
+                log.warn(String.format("Invalid timeout set on frontier method [%s.%s]. Will assume the default timeout",
+                        method.getMethod().getDeclaringClass().getSimpleName(),
+                        method.getMethod().getName()));
+            }else timeoutValue = timeout.value();
+        }
+
+
+        methodBody.append("var params={");
         MethodParam[] parameters = method.getParams();
 
         int index = 0;
@@ -103,6 +111,7 @@ public class FrontiersGenerator {
         signature.append(")");
         function.signature = signature.toString();
         function.body = methodBody.toString();
+        function.setParam("_$tout",String.valueOf(timeoutValue));
 
         Annotation mInvocations = method.getMethod().getAnnotation(MultipleCalls.class);
         if(mInvocations!=null){
@@ -172,9 +181,10 @@ public class FrontiersGenerator {
 
     private String generateWrapper(FrontierFunction f){
 
-        return String.format("return fMx(%s,%s,%s,%s,%s,%s,%s);",
+        return String.format("return fMx(%s,%s,%s,%s,%s,%s,%s,%s);",
                 "params",
                 f.get("$functionUrl"),
+                f.get("_$tout"),
                 f.get("_$fmut"),
                 f.get("_$si"),
                 f.get("_$si_method"),
@@ -183,12 +193,6 @@ public class FrontiersGenerator {
 
     }
 
-    private void ready(){
-
-        this.genericFrontierJS = CDI.current().select(ES5Library.class)
-                .get().getGenericFrontierJS();
-
-    }
 
     public String generate(FrontierClass frontierClass){
 
