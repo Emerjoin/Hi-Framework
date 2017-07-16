@@ -1,6 +1,7 @@
 package org.emerjoin.hi.web;
 
 import org.emerjoin.hi.web.config.AppConfigurations;
+import org.emerjoin.hi.web.i18n.I18nRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,6 +102,13 @@ public class FrontEnd {
         //Set reloadLanguage command if this method is invoked on an ajax request
         if(isRequestAjax()||isFrontierRequest())
             invokeAfter("reloadLanguage", Collections.emptyMap());
+        else {
+
+            if(I18nRuntime.isReady()){
+                I18nRuntime.get().setLanguage(name);
+            }
+
+        }
     }
 
     public void setTemplate(String template) {
