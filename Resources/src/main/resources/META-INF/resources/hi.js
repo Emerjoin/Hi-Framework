@@ -2770,6 +2770,12 @@ Hi.template = function(master){
 };
 
 Hi.redirect = Hi.$nav.navigateTo;
+Hi.reload = function(url){
+
+    document.location.href = App.base_url+url;
+
+};
+
 Hi.ajaxify = Hi.$nav.navigateTo;
 
 //Cria um closure javascript para uma determinada view
