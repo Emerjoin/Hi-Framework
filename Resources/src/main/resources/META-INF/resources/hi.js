@@ -2777,7 +2777,7 @@ Hi.reload = function(url,getParams){
         var route = Hi.$nav.resolveRoute(url);
         route["get"] = getParams;
         var url = Hi.$nav.getURL(route);
-        document.location.href = App.base_url+url;
+        document.location.href = url;
 
     }else{
 
