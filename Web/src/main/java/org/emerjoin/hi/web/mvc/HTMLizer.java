@@ -15,6 +15,7 @@ import org.emerjoin.hi.web.mvc.exceptions.TemplateException;
 import org.emerjoin.hi.web.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.BASE64Encoder;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.spi.CDI;
@@ -181,6 +182,7 @@ public class HTMLizer {
 
         Map map = new HashMap();
         map.put("base_url", requestContext.getBaseURL());
+        map.put("base64_url", new BASE64Encoder().encode(requestContext.getBaseURL().getBytes()));
         map.put("simple_base_url", requestContext.getBaseURL().replace(http,"").replace(https,""));
         map.put("deployId",appContext.getDeployId());
         map.put("deployMode",appContext.getDeployMode().toString());

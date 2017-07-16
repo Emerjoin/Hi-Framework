@@ -683,8 +683,8 @@ Hi.$angular.run = function(){
             }else {
 
                 var oldDeployId = false;
-                if (sessionStorage.hasOwnProperty("deploy-id-"+App.base_url))
-                    oldDeployId = sessionStorage["deploy-id-"+App.base_url];
+                if (sessionStorage.hasOwnProperty("deploy-id-"+App.base64_url))
+                    oldDeployId = sessionStorage["deploy-id-"+App.base64_url];
                 else{
 
                     Hi.$ui.html.cache.destroy();
@@ -704,7 +704,7 @@ Hi.$angular.run = function(){
 
                 }
 
-                sessionStorage["deploy-id-"+App.base_url] = App.deployId;
+                sessionStorage["deploy-id-"+App.base64_url] = App.deployId;
 
                 if (App.deployMode == "DEVELOPMENT")
                     Hi.$ui.html.cache.on = false;
@@ -859,7 +859,7 @@ Hi.$ui.html.prepareView = function(route_name_or_object){
 
 Hi.$ui.html.cache.getStorageKey = function(){
 
-    return "hi-app-views-"+App.base_url;
+    return "hi-app-views-"+App.base64_url;
 
 };
 
@@ -2049,7 +2049,7 @@ Hi.$nav.getCachingURL= function(route,covw) {
 
     var route_url = "";
     if(typeof App!="undefined")
-        route_url = App.base_url;
+        route_url = App.base64_url;
 
     if (route.controller && !route.controller) {
 
@@ -2827,7 +2827,6 @@ window.onpopstate = function(param){
         //if(param.state){
 
         var destination = the_requested_url.replace(App.base_url,"");
-        console.info("Destination route : "+destination);
 
         Hi.$nav.routeBack(destination);
 
@@ -2900,7 +2899,7 @@ Hi.i18n.cache.destroy = function(){
 
 Hi.i18n.init = function(){
 
-    Hi.i18n.cache.key = "i18n-"+App.base_url;
+    Hi.i18n.cache.key = "i18n-"+App.base64_url;
     var cache =  Hi.i18n.cache.get();
     if(cache.hasOwnProperty("$zero")){
 
