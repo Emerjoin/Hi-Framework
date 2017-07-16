@@ -2770,10 +2770,20 @@ Hi.template = function(master){
 };
 
 Hi.redirect = Hi.$nav.navigateTo;
-Hi.reload = function(url){
+Hi.reload = function(url,getParams){
 
-    document.location.href = App.base_url+url;
+    if(typeof getParams!="undefined"){
 
+        var route = Hi.$nav.resolveRoute(url);
+        route["get"] = getParams;
+        var url = Hi.$nav.getURL(route);
+        document.location.href = App.base_url+url;
+
+    }else{
+
+        document.location.href = App.base_url+url;
+
+    }
 };
 
 Hi.ajaxify = Hi.$nav.navigateTo;
