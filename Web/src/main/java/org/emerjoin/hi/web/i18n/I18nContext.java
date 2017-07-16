@@ -1,5 +1,8 @@
 package org.emerjoin.hi.web.i18n;
+
 import javax.enterprise.context.RequestScoped;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +47,13 @@ public class I18nContext {
     public Map<String,String> collect(){
 
         return exported;
+
+    }
+
+    public boolean isLanguageKnown(String name){
+
+         return I18nRuntime.isReady() && Arrays.asList(I18nRuntime.get()
+                 .getConfiguration().getLanguages()).indexOf(name)>-1;
 
     }
 
