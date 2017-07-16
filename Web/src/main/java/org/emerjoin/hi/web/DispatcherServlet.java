@@ -3,9 +3,9 @@ package org.emerjoin.hi.web;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.ConfigProvider;
 import org.emerjoin.hi.web.boot.BootAgent;
-import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.internal.Router;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
@@ -26,7 +26,7 @@ import static org.emerjoin.hi.web.uti.Timing.*;
 @WebServlet(urlPatterns = "/*",name = "Hi-Framework-Dispatcher-Servlet",loadOnStartup = 1)
 public class DispatcherServlet extends HttpServlet {
 
-    private static Logger _log = Logging.getInstance().getLogger();
+    private static Logger _log = LoggerFactory.getLogger(DispatcherServlet.class);
 
     @Inject
     private BootAgent bootAgent;

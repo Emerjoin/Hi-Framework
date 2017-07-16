@@ -3,7 +3,6 @@ package org.emerjoin.hi.web.frontier;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.exceptions.HiException;
 import org.emerjoin.hi.web.internal.ES5Library;
-import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.meta.MultipleCalls;
 import org.emerjoin.hi.web.meta.SingleCall;
 import org.emerjoin.hi.web.frontier.model.FrontierClass;

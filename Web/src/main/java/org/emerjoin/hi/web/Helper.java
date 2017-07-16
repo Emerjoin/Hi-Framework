@@ -1,7 +1,7 @@
 package org.emerjoin.hi.web;
 
-import org.emerjoin.hi.web.internal.Logging;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import java.util.Scanner;
  */
 public class Helper {
 
-    private static Logger log = Logging.getInstance().getLogger(Helper.class);
+    private static Logger log = LoggerFactory.getLogger(Helper.class);
 
     public static String readLines(InputStream inputStream, RequestContext requestContext){
 

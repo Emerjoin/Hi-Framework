@@ -2,11 +2,11 @@ package org.emerjoin.hi.web.req;
 
 import org.emerjoin.hi.web.AuthComponent;
 import org.emerjoin.hi.web.RequestContext;
-import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.meta.Denied;
 import org.emerjoin.hi.web.meta.Granted;
 import org.emerjoin.hi.web.meta.RequirePermission;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.servlet.ServletException;
@@ -32,7 +32,7 @@ public abstract class ReqHandler {
     private static Map<String,ReqHandler> handlers = new HashMap();
     private static Map<ReqHandler,Class> handlersClasses = new HashMap();
 
-    private static Logger _log = Logging.getInstance().getLogger(ReqHandler.class);
+    private static Logger _log = LoggerFactory.getLogger(ReqHandler.class);
 
     public static void register(ReqHandler reqHandler,Class<? extends ReqHandler> clazz){
 

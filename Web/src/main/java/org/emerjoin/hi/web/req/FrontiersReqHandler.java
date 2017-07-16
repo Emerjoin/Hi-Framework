@@ -16,9 +16,9 @@ import org.emerjoin.hi.web.frontier.exceptions.MissingFrontierParamException;
 import org.emerjoin.hi.web.frontier.model.FrontierClass;
 import org.emerjoin.hi.web.frontier.model.FrontierMethod;
 import org.emerjoin.hi.web.frontier.model.MethodParam;
-import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.mvc.HTMLizer;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -378,7 +378,7 @@ public class FrontiersReqHandler extends ReqHandler {
     @PostConstruct
     private void handlerReady(){
 
-        log = Logging.getInstance().getLogger(FrontiersReqHandler.class);
+        log = LoggerFactory.getLogger(FrontiersReqHandler.class);
 
     }
 

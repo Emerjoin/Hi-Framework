@@ -6,12 +6,12 @@ import org.emerjoin.hi.web.RequestContext;
 import org.emerjoin.hi.web.events.ControllerRequestEvent;
 import org.emerjoin.hi.web.exceptions.HiException;
 import org.emerjoin.hi.web.i18n.I18nRuntime;
-import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.mvc.ControllersMapper;
 import org.emerjoin.hi.web.AppContext;
 import org.emerjoin.hi.web.mvc.HTMLizer;
 import org.emerjoin.hi.web.mvc.exceptions.MvcException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -36,6 +36,7 @@ public class MVCReqHandler extends ReqHandler{
             'K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 
     private static HashMap<String,String> templates = new HashMap<String, String>();
+    private static Logger LOG = LoggerFactory.getLogger(MVCReqHandler.class);
 
     public static void storeTemplate(String name,String content){
 
@@ -140,6 +141,15 @@ public class MVCReqHandler extends ReqHandler{
                 actionMethod = controller.getMethod(action, null);
             }
 
+            String mappedTemplate = ControllersMapper.getPathTemplate(requestContext.getRouteUrl());
+            if(mappedTemplate!=null){
+                String currentTemplate = frontEnd.getTemplate();
+                if(!currentTemplate.equals(mappedTemplate)) {
+                    LOG.debug(String.format("Setting mapped template : %s",mappedTemplate));
+                    frontEnd.setTemplate(mappedTemplate);
+                }
+            }
+
             if(!ReqHandler.accessGranted(controller,actionMethod)){
 
                 try {
@@ -236,7 +246,7 @@ public class MVCReqHandler extends ReqHandler{
     @PostConstruct
     private void ready(){
 
-        log = Logging.getInstance().getLogger(MVCReqHandler.class);
+        log = LoggerFactory.getLogger(MVCReqHandler.class);
 
     }
 

@@ -1,10 +1,10 @@
 package org.emerjoin.hi.web;
 
-import org.emerjoin.hi.web.internal.Logging;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.Indexer;
 import org.jboss.jandex.JarIndexer;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContext;
 import java.io.File;
@@ -22,7 +22,7 @@ public class BootstrapUtils {
     private static Set<URL> libraries = null;
     private static Set<URL> classFiles = null;
     private static Set<Index> indexSet = null;
-    private static Logger log = Logging.getInstance().getLogger(BootstrapUtils.class);
+    private static Logger log = LoggerFactory.getLogger(BootstrapUtils.class);
     public static boolean DISABLE_SERVLET_CONTEXT_SCANNING = false;
 
     private static void indexClassURLs(Set<URL> classes, Indexer indexer, ServletContext context){

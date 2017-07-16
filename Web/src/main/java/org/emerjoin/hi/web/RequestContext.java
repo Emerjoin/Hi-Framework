@@ -2,8 +2,8 @@ package org.emerjoin.hi.web;
 
 
 
-import org.emerjoin.hi.web.internal.Logging;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -34,7 +34,7 @@ public class RequestContext {
     private String routeUrl;
 
     private OutputStream outputStream = null;
-    private Logger log = Logging.getInstance().getLogger(RequestContext.class);
+    private Logger log = LoggerFactory.getLogger(RequestContext.class);
 
     @PostConstruct
     private void getReady(){

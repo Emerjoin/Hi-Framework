@@ -8,7 +8,6 @@ import org.emerjoin.hi.web.exceptions.HiException;
 import org.emerjoin.hi.web.i18n.I18nStarter;
 import org.emerjoin.hi.web.i18n.I18nConfiguration;
 import org.emerjoin.hi.web.internal.ES5Library;
-import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.internal.Router;
 import org.emerjoin.hi.web.meta.Tested;
 import org.emerjoin.hi.web.mvc.Controller;
@@ -16,6 +15,7 @@ import org.emerjoin.hi.web.mvc.ControllersMapper;
 import org.emerjoin.hi.web.req.MVCReqHandler;
 import org.jboss.jandex.*;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -33,7 +33,7 @@ public class BootAgent {
 
     private ServletContext servletContext = null;
     private ServletConfig servletConfig = null;
-    private Logger _log = Logging.getInstance().getLogger();
+    private Logger _log = LoggerFactory.getLogger(BootAgent.class);
     private String deployId ="";
 
     @Inject

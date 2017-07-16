@@ -7,12 +7,12 @@ import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.events.TemplateLoadEvent;
 import org.emerjoin.hi.web.events.TemplateTransformEvent;
 import org.emerjoin.hi.web.i18n.I18nContext;
-import org.emerjoin.hi.web.internal.Logging;
 import org.emerjoin.hi.web.mvc.exceptions.ConversionFailedException;
 import org.emerjoin.hi.web.mvc.exceptions.MvcException;
 import org.emerjoin.hi.web.mvc.exceptions.NoSuchViewException;
 import org.emerjoin.hi.web.mvc.exceptions.TemplateException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.spi.CDI;
@@ -43,7 +43,7 @@ public class Controller {
     @Inject
     private I18nContext i18nContext;
 
-    private static Logger _log = Logging.getInstance().getLogger(Controller.class);
+    private static Logger _log = LoggerFactory.getLogger(Controller.class);
 
     private void prepareView(RequestContext requestContext, String controllerName, String actionName,
                              String viewFile, String viewJsfile, String viewJsMinifiedfile) throws NoSuchViewException {
@@ -129,6 +129,7 @@ public class Controller {
         AppConfigurations config = AppConfigurations.get();
         RequestContext requestContext = CDI.current().select(RequestContext.class).get();
 
+
         String actionName = requestContext.getData().get("actionU").toString();
         String controllerName = requestContext.getData().get("controllerU").toString();
         String presentationHtmlFile =actionName.toString();
@@ -145,6 +146,7 @@ public class Controller {
         String viewJSMiniFile = "/"+config.getViewsDirectory()+"/"+controllerName+"/"+actionName.toString()+".min.js";
 
         FrontEnd frontEnd = CDI.current().select(FrontEnd.class).get();
+
         if(!requestContext.hasAjaxHeader())
             templateLoadEvent.fire(new TemplateLoadEvent());
 

@@ -1,7 +1,7 @@
 package org.emerjoin.hi.web;
 
-import org.emerjoin.hi.web.internal.Logging;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
@@ -18,7 +18,7 @@ public class ActiveUser implements Serializable {
 
     private String csrfToken = "";
     private HashMap<String,Object> data = new HashMap<>();
-    private Logger _log = Logging.getInstance().getLogger(ActiveUser.class);
+    private Logger _log = LoggerFactory.getLogger(ActiveUser.class);
 
     public ActiveUser(){
 

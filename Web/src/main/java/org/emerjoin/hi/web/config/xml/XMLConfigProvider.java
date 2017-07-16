@@ -3,11 +3,11 @@ package org.emerjoin.hi.web.config.xml;
 import com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory;
 import org.emerjoin.hi.web.config.*;
 import org.emerjoin.hi.web.exceptions.HiException;
-import org.emerjoin.hi.web.internal.Logging;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -39,7 +39,7 @@ import java.util.Set;
 public class XMLConfigProvider implements ConfigProvider {
 
     private String docsPath = null;
-    private Logger _log = Logging.getInstance().getLogger(XMLConfigProvider.class);
+    private Logger _log = LoggerFactory.getLogger(XMLConfigProvider.class);
 
     private Configurator getConfigurator(Class<? extends Configurator> clazz) throws HiException {
 

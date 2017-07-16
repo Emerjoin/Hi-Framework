@@ -1,8 +1,8 @@
 package org.emerjoin.hi.web;
 
 import org.emerjoin.hi.web.config.AppConfigurations;
-import org.emerjoin.hi.web.internal.Logging;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -34,7 +34,7 @@ public class FrontEnd {
     private Map<String,Object> templateData = new HashMap<>();
 
 
-    private Logger log = Logging.getInstance().getLogger(FrontEnd.class);
+    private Logger log = LoggerFactory.getLogger(FrontEnd.class);
 
 
     @PostConstruct

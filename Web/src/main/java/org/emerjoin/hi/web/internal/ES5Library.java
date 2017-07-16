@@ -15,6 +15,7 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.Index;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.ServletContext;
@@ -47,7 +48,7 @@ public class ES5Library {
 
 
     private ServletContext servletContext = null;
-    private static Logger _log = Logging.getInstance().getLogger(ES5Library.class);
+    private static Logger _log = LoggerFactory.getLogger(ES5Library.class);
 
 
     public void init(ServletContext context)throws HiException {

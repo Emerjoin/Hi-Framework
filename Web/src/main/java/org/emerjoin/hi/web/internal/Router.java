@@ -5,6 +5,7 @@ import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.exceptions.HiException;
 import org.emerjoin.hi.web.req.*;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.CDI;
@@ -22,7 +23,7 @@ public class Router {
 
 
     private HashMap<String,String> matchedUrls = new HashMap();
-    private static Logger _log = Logging.getInstance().getLogger(Router.class);
+    private static Logger _log = LoggerFactory.getLogger(Router.class);
 
     public void init(ServletContext context, ServletConfig config) throws HiException {
 
