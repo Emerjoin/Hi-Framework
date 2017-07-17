@@ -91,8 +91,17 @@ public class FrontEnd {
 
     }
 
+    public void putOnTemplate(String key, Object value){
+        if(key==null||key.isEmpty())
+            throw new IllegalArgumentException("Key must not be null nor empty");
+        if(value==null)
+            throw new IllegalArgumentException("Value must not be null");
+        templateData.put(key,value);
+    }
 
     public void setTemplateData(Map<String,Object> templateData) {
+        if(templateData==null)
+            throw new IllegalArgumentException("Template data Map must not be null");
         this.templateData = templateData;
     }
 

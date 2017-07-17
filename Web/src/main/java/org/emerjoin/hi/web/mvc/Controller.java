@@ -132,7 +132,7 @@ public class Controller {
 
         String actionName = requestContext.getData().get("actionU").toString();
         String controllerName = requestContext.getData().get("controllerU").toString();
-        String presentationHtmlFile =actionName.toString();
+        String presentationHtmlFile = actionName.toString();
 
         String viewMode = requestContext.getRequest().getParameter("$");
         boolean withViewMode = false;
@@ -146,12 +146,25 @@ public class Controller {
         String viewJSMiniFile = "/"+config.getViewsDirectory()+"/"+controllerName+"/"+actionName.toString()+".min.js";
 
         FrontEnd frontEnd = CDI.current().select(FrontEnd.class).get();
+        TemplateLoadEvent event = null;
 
-        if(!requestContext.hasAjaxHeader())
-            templateLoadEvent.fire(new TemplateLoadEvent());
+
+        if(!requestContext.hasAjaxHeader()){
+            event = new TemplateLoadEvent();
+            templateLoadEvent.fire(event);
+        }
+
 
         if(values==null)
             values = new HashMap<>();
+
+        Map<String,Object> templateData = new HashMap<>();
+        templateData.putAll(frontEnd.getTemplateData());
+        if(event!=null)
+            templateData.putAll(event.getValues());
+
+        if(frontEnd.getTemplateData()!=null)
+            values.put(HTMLizer.TEMPLATE_DATA_KEY,templateData);
 
         requestContext.getData().put(VIEW_DATA_KEY,values);
 

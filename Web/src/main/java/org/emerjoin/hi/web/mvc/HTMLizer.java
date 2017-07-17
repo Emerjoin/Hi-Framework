@@ -390,7 +390,8 @@ public class HTMLizer {
         else route.put("mode",false);
 
         if(!viewData.containsKey(TEMPLATE_DATA_KEY))
-            viewData.put("$root", new HashMap<>());
+            viewData.put(TEMPLATE_DATA_KEY, new HashMap<>());
+
         Map $templateDataMap = (Map) viewData.get("$root");
         viewData.put("$root",$templateDataMap);
 
