@@ -57,21 +57,6 @@ public abstract class AbstractTransformable implements Transformable {
 
     }
 
-    @Deprecated
-    public String getMarkup(){
-
-        return this.markup;
-
-    }
-
-    @Deprecated
-    public Transformable setMarkup(String markup){
-        if(markup==null||markup.isEmpty())
-            throw new IllegalArgumentException("markup must not be null nor empty");
-        this.markup = markup;
-        return this;
-
-    }
 
     public Transformable replaceHtml(String html){
         if(html==null||html.isEmpty())
@@ -79,6 +64,14 @@ public abstract class AbstractTransformable implements Transformable {
         this.markup = html;
         return this;
     }
+
+
+    protected String getMarkup(){
+
+        return markup;
+
+    }
+
 
 
     public String getHtml(){

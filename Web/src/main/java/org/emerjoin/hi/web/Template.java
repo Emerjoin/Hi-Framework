@@ -18,4 +18,21 @@ public class Template extends AbstractTransformable {
         return name;
 
     }
+
+    @Deprecated
+    public String getMarkup(){
+
+        return getHtml();
+
+    }
+
+    @Deprecated
+    public Transformable setMarkup(String markup){
+        if(markup==null||markup.isEmpty())
+            throw new IllegalArgumentException("markup must not be null nor empty");
+        replaceHtml(markup);
+        return this;
+
+    }
+
 }

@@ -1,6 +1,7 @@
 package org.emerjoin.hi.web.events;
 
 import org.emerjoin.hi.web.Template;
+import org.emerjoin.hi.web.Transformable;
 
 /**
  * @author Mário Júnior
@@ -18,5 +19,6 @@ public class TemplateTransformEvent extends TransformEvent {
         return (Template) getTransformable();
 
     }
+
 
 }

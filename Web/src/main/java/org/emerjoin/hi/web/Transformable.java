@@ -17,13 +17,7 @@ public interface Transformable {
 
     Transformable prepend(String content);
 
-    @Deprecated
-    String getMarkup();
-
     String getHtml();
-
-    @Deprecated
-    Transformable setMarkup(String markup);
 
     Transformable replaceHtml(String html);
 
