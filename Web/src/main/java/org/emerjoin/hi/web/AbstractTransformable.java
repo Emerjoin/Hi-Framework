@@ -66,13 +66,6 @@ public abstract class AbstractTransformable implements Transformable {
     }
 
 
-    protected String getMarkup(){
-
-        return markup;
-
-    }
-
-
 
     public String getHtml(){
 
