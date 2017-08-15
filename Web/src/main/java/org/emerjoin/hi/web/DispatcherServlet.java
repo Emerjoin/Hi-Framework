@@ -68,7 +68,7 @@ public class DispatcherServlet extends HttpServlet {
 
             tic();
 
-            HttpSession session = request.getSession();
+            HttpSession session = request.getSession(true);
             String routeURL = getRouteURL(request);
 
             routeURL = filterRouteURL(routeURL, response);
