@@ -51,14 +51,6 @@ public class I18nConfiguration {
         this.defaultLanguage = defaultLanguage;
     }
 
-    public boolean isEncodingUTF8() {
-        return encodingUTF8;
-    }
-
-    protected void setEncodingUTF8(boolean encodingUTF8) {
-        this.encodingUTF8 = encodingUTF8;
-    }
-
     public Optional<String> getCacheClassName() {
         return Optional.ofNullable(cacheClassName);
     }
