@@ -202,6 +202,9 @@ public class MVCReqHandler extends ReqHandler{
         //Before action Event
         controllerRequestEvent.fire(call);
 
+        if(call.wasInterrupted())
+            return;
+
         if(withParams)
             actionMethod.invoke(instance,getValues(requestContext.getRequest()));
         else
