@@ -67,7 +67,7 @@ public class I18nStarter {
 
     private String getDictionaryFilePath(String lang, String name){
 
-        return String.format("/i18n/%s/%s.properties", lang, name);
+        return String.format("/i18n/%s/%s.lang", lang, name);
 
     }
 
@@ -76,7 +76,7 @@ public class I18nStarter {
 
         List<URL> dics =  xmlElements.parallel().map(element -> {
             String URI = element.getTextContent();
-            String path = String.format("/i18n/%s/%s", lang, URI);
+            String path = String.format("/i18n/%s/%s.lang", lang, URI);
             LOG.debug(String.format("Dictionary File : [%s]",path));
 
             URL resource = null;
