@@ -19,6 +19,59 @@ public class Template extends AbstractTransformable {
 
     }
 
+
+    private void validateUrl(String url){
+        if(url==null||url.isEmpty())
+            throw new IllegalArgumentException("url must not be null nor empty");
+    }
+
+    public Transformable appendJS(String url){
+        validateUrl(url);
+        append(String.format("<script src='%s'></script>",url));
+        return this;
+
+    }
+
+    public Transformable appendCSS(String url){
+        validateUrl(url);
+        append(String.format("<link rel='stylesheet' href='%s'/>",url));
+        return this;
+
+    }
+
+    public Transformable prependJS(String url){
+        validateUrl(url);
+        prepend(String.format("<script src='%s'></script>",url));
+        return this;
+
+    }
+
+    public Transformable prependCSS(String url){
+        validateUrl(url);
+        prepend(String.format("<link rel='stylesheet' href='%s'/>",url));
+        return this;
+
+    }
+
+
+
+    public Transformable append(String content){
+        validateContent(content);
+        replaceHtml(getHtml().replace("</body>",content+"</body>"));
+        return this;
+
+    }
+
+
+    public Transformable prepend(String content){
+        validateContent(content);
+        replaceHtml(getHtml().replace("<body>",content+"<body>"));
+        return this;
+
+    }
+
+
+
     @Deprecated
     public String getMarkup(){
 

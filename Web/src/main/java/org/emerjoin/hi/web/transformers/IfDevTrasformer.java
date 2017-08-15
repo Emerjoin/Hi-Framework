@@ -70,6 +70,7 @@ public class IfDevTrasformer {
     private void ifDevelopment(Element element){
 
         String attrValue = element.attr(IF_DEV_ATTR);
+        element.removeAttr(IF_DEV_ATTR);
         boolean keepElement = true;
 
         if(attrValue.equalsIgnoreCase("false"))

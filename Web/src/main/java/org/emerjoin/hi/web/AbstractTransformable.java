@@ -1,5 +1,8 @@
 package org.emerjoin.hi.web;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 /**
  * @author Mário Júnior
  */
@@ -13,49 +16,15 @@ public abstract class AbstractTransformable implements Transformable {
         this.markup = html;
     }
 
-    public Transformable appendJS(String url){
 
-        append(String.format("<script src='%s'></script>",url));
-        return this;
+
+    protected void validateContent(String content){
+        if(content==null||content.isEmpty())
+            throw new IllegalArgumentException("Content must not be null nor empty");
+
 
     }
 
-    public Transformable appendCSS(String path){
-
-        append(String.format("<link rel='stylesheet' href='%s'/>",path));
-        return this;
-
-    }
-
-    public Transformable prependJS(String url){
-
-        prepend(String.format("<script src='%s'></script>",url));
-        return this;
-
-    }
-
-    public Transformable prependCSS(String path){
-
-        prepend(String.format("<link rel='stylesheet' href='%s'/>",path));
-        return this;
-
-    }
-
-
-    public Transformable append(String content){
-
-        markup = markup.replace("</body>",content+"</body>");
-        return this;
-
-    }
-
-
-    public Transformable prepend(String content){
-
-        markup = markup.replace("<body>",content+"<body>");
-        return this;
-
-    }
 
 
     public Transformable replaceHtml(String html){
@@ -69,7 +38,7 @@ public abstract class AbstractTransformable implements Transformable {
 
     public String getHtml(){
 
-        return this.markup;
+        return markup;
 
     }
 

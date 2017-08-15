@@ -390,6 +390,7 @@ public class HTMLizer {
             View v = new View(viewHTML);
             ViewTransformEvent event = new ViewTransformEvent(v);
             viewTransformEvent.fire(event);
+            viewHTML = event.getTransformable().getHtml();
 
         }
 
