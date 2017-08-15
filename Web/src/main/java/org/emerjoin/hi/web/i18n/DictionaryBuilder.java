@@ -1,5 +1,7 @@
 package org.emerjoin.hi.web.i18n;
 
+import org.emerjoin.ioutils.Mappings;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,22 +25,18 @@ public class DictionaryBuilder {
 
     public void put(InputStream dictionaryFile, I18nConfiguration configuration){
 
-        Properties p = new Properties();
+        Map<String,String> map = new HashMap<>();
 
         try {
 
-            if (configuration.isEncodingUTF8())
-                p.load(new InputStreamReader(dictionaryFile, Charset.forName("UTF-8")));
-            else
-                p.load(dictionaryFile);
+            map = Mappings.load(dictionaryFile);
+            dictionary.putAll(map);
 
-        }catch (IOException ex){
+        }catch (Exception ex){
 
             throw new I18nException("Failed to load a Language dictionary file",ex);
 
         }
-
-        p.forEach((k,v) -> dictionary.put(k.toString(),v.toString()));
 
     }
 
