@@ -293,14 +293,12 @@ Hi.$angular.directives.aload = function(){
 
                 i.onload = function () {
 
-                    //console.log('loaded image '+img_source);
                     $(element).attr('src',img_source);
 
                 };
                 i.onerror = function(){
 
                     $(element).attr('src',loadError);
-                    //console.error('error loading image : '+img_source);
 
                 };
 
@@ -1235,6 +1233,9 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
 
         }
 
+
+        Hi.$nav.isGoingBack = false;
+
         viewScope.$apply(function(){
 
 
@@ -1309,6 +1310,9 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
                 }
 
             }
+
+
+            Hi.$nav.isGoingBack = false;
 
 
         }else{
@@ -1712,10 +1716,11 @@ Hi.$nav.getTextViewPath = function(controller, action){
 
 };
 
-Hi.$nav.routeBack = function(route_name_or_object,getParams){
+Hi.$nav.routeBack = function(route_name_or_object){
 
     Hi.$nav.isGoingBack = true;
-    Hi.$nav.navigateTo(route_name_or_object,getParams);
+    Hi.$nav.navigateTo(route_name_or_object,undefined);
+
 
 
 };
@@ -1821,7 +1826,6 @@ Hi.$nav.navigateTo = function(route_name_or_object,getParams,embed,callback,$emb
 
     }
 
-
     //Objecto de rota invalido
     if(!route_object){
 
@@ -1849,7 +1853,6 @@ Hi.$nav.navigateTo = function(route_name_or_object,getParams,embed,callback,$emb
 
     //Gera o path novamente
     var path = Hi.$nav.getURL(route_object);
-
 
     if(!route_object.dialog){
 
@@ -1973,16 +1976,12 @@ Hi.$nav.navigateTo = function(route_name_or_object,getParams,embed,callback,$emb
 
             if(embed){
 
-
                 if(typeof callback=="function"){
 
                     callback.call({},generated);
 
                 }
-
             }
-
-
 
 
         },server_directives);
@@ -2093,17 +2092,12 @@ Hi.$nav.currentRoute = false;
 Hi.$nav.setLocation = function (location,route){
 
     Hi.$nav.currentPage=location;
-    Hi.$nav.currentRoute = route;
-
+    Hi.$nav.currentRoute = JSON.parse(route);
 
 
     if(!Hi.$nav.isGoingBack){
-
-        window.history.pushState(route,Hi.$ui.html.getTitle()+Math.random(),location);
-
+        window.history.pushState(Hi.$nav.currentRoute,"",location);
     }
-    else
-        Hi.$nav.isGoingBack = false;
 
 
 };
@@ -2820,7 +2814,7 @@ Array.prototype.removeVal = function(el){
 };
 
 
-window.onpopstate = function(param){
+window.onpopstate = function(event){
 
     if(typeof App=="undefined")
         return;
@@ -2840,13 +2834,8 @@ window.onpopstate = function(param){
 
         }
 
-        //if(param.state){
-
         var destination = the_requested_url.replace(App.base_url,"");
-
         Hi.$nav.routeBack(destination);
-
-       // }
 
     }
 
