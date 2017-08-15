@@ -124,12 +124,12 @@ public class Router {
 
             }catch (ServletException ex){
 
-                requestContext.getResponse().sendError(500);
+                //requestContext.getResponse().sendError(500);//
                 throw ex;
 
-            }catch (Exception ex){
+            }catch (Throwable ex){
 
-                requestContext.getResponse().sendError(500);
+                //requestContext.getResponse().sendError(500);
                 throw new ServletException(ex);
             }
 
