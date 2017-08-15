@@ -10,7 +10,11 @@ Please read the documentation at [https://docs.hi-framework.org](https://docs.hi
 * i18n support added
 * @Template 
 * Frontiers timeout control via hi.xml and @Timeout
-* FrontEnd.putOnTemplate(key, value) introduced
 * Hi-es5.js obfuscated in PRODUCTION mode
 * ajaxify now sets href=javascript:void(0)
-* Hi.reload(args) introduced
+## New APIS
+* Hi.reload(args)
+* FrontierRequestEvent.overrideResult(value)
+* FrontierRequestEvent.interupt()
+* ControllerRequestEvent.interupt()
+* FrontEnd.putOnTemplate(key, value)
