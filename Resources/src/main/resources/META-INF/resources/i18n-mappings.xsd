@@ -17,7 +17,7 @@
 
     <xsd:complexType name="templateMappingSetType">
         <xsd:sequence>
-            <xsd:element name="dictionary-file" type="i18n:notEmptyString" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+            <xsd:element name="dictionary" type="i18n:notEmptyString" minOccurs="1" maxOccurs="unbounded"></xsd:element>
         </xsd:sequence>
         <xsd:attribute name="for" type="i18n:templateNameType"></xsd:attribute>
     </xsd:complexType>
@@ -36,7 +36,7 @@
 
     <xsd:complexType name="viewMappingSetType">
         <xsd:sequence>
-            <xsd:element name="dictionary-file" type="i18n:notEmptyString" minOccurs="1" maxOccurs="unbounded"></xsd:element>
+            <xsd:element name="dictionary" type="i18n:notEmptyString" minOccurs="1" maxOccurs="unbounded"></xsd:element>
         </xsd:sequence>
         <xsd:attribute name="for" type="i18n:notEmptyString"></xsd:attribute>
     </xsd:complexType>

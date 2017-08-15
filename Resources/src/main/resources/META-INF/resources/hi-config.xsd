@@ -35,7 +35,6 @@
             <xsd:element name="dictionaries" type="hi:i18nDictionariesType" maxOccurs="1" minOccurs="0"></xsd:element>
             <xsd:element name="languages" type="hi:i18nLanguagesType" maxOccurs="1" minOccurs="1"></xsd:element>
             <xsd:element name="cache" type="hi:StringWithAtLeast2Letters" maxOccurs="1" minOccurs="0"></xsd:element>
-            <xsd:element name="unicode-encoding" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
             <xsd:element name="disable-full-bundle-exportation" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
             <xsd:element name="enable-mappings" type="xsd:boolean" maxOccurs="1" minOccurs="0"></xsd:element>
         </xsd:all>
