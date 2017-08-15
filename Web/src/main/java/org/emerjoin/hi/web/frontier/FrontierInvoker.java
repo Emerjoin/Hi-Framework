@@ -6,6 +6,7 @@ import org.emerjoin.hi.web.frontier.model.MethodParam;
 
 import javax.validation.ConstraintViolationException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -16,7 +17,8 @@ public class FrontierInvoker {
     private FrontierClass frontier;
     private FrontierMethod method;
     private Map params;
-    private Object returnedObject;
+    private Object returnedObject = new HashMap<>();
+
 
     public FrontierInvoker(FrontierClass frontierClass, FrontierMethod method, Map params){
 
@@ -26,6 +28,13 @@ public class FrontierInvoker {
 
     }
 
+    public void setReturnedObject(Object value){
+
+        if(value==null)
+            throw new IllegalArgumentException("Returned value must not be null");
+        this.returnedObject = value;
+
+    }
 
     public boolean invoke() throws Exception {
 
