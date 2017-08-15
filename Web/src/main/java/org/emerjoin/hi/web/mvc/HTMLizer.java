@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.emerjoin.hi.web.AppContext;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.events.TemplateTransformEvent;
+import org.emerjoin.hi.web.events.ViewTransformEvent;
 import org.emerjoin.hi.web.i18n.I18nContext;
 import org.emerjoin.hi.web.i18n.I18nRuntime;
 import org.emerjoin.hi.web.internal.ES5Library;
@@ -83,10 +84,11 @@ public class HTMLizer {
 
         if(I18nRuntime.isReady())
             templateFileContent = I18nRuntime.get().translateTemplate(templateName,templateFileContent);
-
-        TemplateTransformEvent templateTransformEvent = new TemplateTransformEvent(templateName,templateFileContent);
+        TemplateTransformEvent templateTransformEvent =
+                new TemplateTransformEvent(new Template(templateFileContent,templateName));
         transformEvent.fire(templateTransformEvent);
-        templateFileContent = AppConfigurations.get().getTunings().applySmartCaching(templateTransformEvent.getTemplate().getMarkup(),false,templateName);
+        templateFileContent = AppConfigurations.get().getTunings()
+                .applySmartCaching(templateTransformEvent.getTemplate().getHtml(),false,templateName);
 
 
         return templateFileContent;
@@ -357,11 +359,14 @@ public class HTMLizer {
     }
 
     public String process(Controller controller, boolean ignoreView,
-                          boolean withViewMode, String viewMode, Event<TemplateTransformEvent> transformEvent) throws TemplateException, ConversionFailedException {
+                          boolean withViewMode, String viewMode,
+                          Event<TemplateTransformEvent> templateTransformEventEvent,
+                          Event<ViewTransformEvent> viewTransformEvent) throws TemplateException, ConversionFailedException {
+
         requestContext.getResponse().setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         FrontEnd frontEnd = CDI.current().select(FrontEnd.class).get();
         ES5Library es5Lib = CDI.current().select(ES5Library.class).get();
-        String template = fetchTemplate(frontEnd,transformEvent);
+        String template = fetchTemplate(frontEnd,templateTransformEventEvent);
         String loaderJSContent= es5Lib.getHiLoaderJS();
         Map<String,Object> viewData = (Map<String,Object>) requestContext.getData().get(Controller.VIEW_DATA_KEY);
 
@@ -373,6 +378,7 @@ public class HTMLizer {
         }
 
         if(viewHTML!=null){
+
              if(I18nRuntime.isReady()){
                  String viewId = requestContext.getData().get("controllerU").toString()+":"+requestContext.getData().get("actionU").toString();
                  if(withViewMode)
@@ -380,6 +386,11 @@ public class HTMLizer {
                  I18nRuntime i18n = I18nRuntime.get();
                  viewHTML = i18n.translateView(viewId,viewHTML);
              }
+
+            View v = new View(viewHTML);
+            ViewTransformEvent event = new ViewTransformEvent(v);
+            viewTransformEvent.fire(event);
+
         }
 
         Map<String,Object> route = new HashMap<>();

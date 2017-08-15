@@ -3,9 +3,11 @@ package org.emerjoin.hi.web.mvc;
 import org.emerjoin.hi.web.FrontEnd;
 import org.emerjoin.hi.web.RequestContext;
 import org.emerjoin.hi.web.Helper;
+import org.emerjoin.hi.web.View;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.events.TemplateLoadEvent;
 import org.emerjoin.hi.web.events.TemplateTransformEvent;
+import org.emerjoin.hi.web.events.ViewTransformEvent;
 import org.emerjoin.hi.web.i18n.I18nContext;
 import org.emerjoin.hi.web.mvc.exceptions.ConversionFailedException;
 import org.emerjoin.hi.web.mvc.exceptions.MvcException;
@@ -39,6 +41,9 @@ public class Controller {
 
     @Inject
     private Event<TemplateTransformEvent> templateTransformEvent;
+
+    @Inject
+    private Event<ViewTransformEvent> viewTransformEventEvent;
 
     @Inject
     private I18nContext i18nContext;
@@ -170,14 +175,16 @@ public class Controller {
 
         //Do not need to load the view file
         if(requestContext.getData().containsKey("ignore_view")){
-            htmLizer.process(this,true,withViewMode,viewMode,templateTransformEvent);
+            htmLizer.process(this,true,withViewMode,viewMode,templateTransformEvent,
+                    viewTransformEventEvent);
             return;
         }
 
         prepareView(requestContext,controllerName,actionName,viewFile,viewJSFile,viewJSMiniFile);
         htmLizer.setRequestContext(requestContext);
         htmLizer.setI18nContext(i18nContext);
-        htmLizer.process(this,false,withViewMode,viewMode,templateTransformEvent);
+        htmLizer.process(this,false,withViewMode,viewMode,templateTransformEvent,
+                viewTransformEventEvent);
 
     }
 
