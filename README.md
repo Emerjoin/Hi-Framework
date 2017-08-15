@@ -6,6 +6,7 @@ It's a light Java Framework that allows developers to write fully Ajax web appli
 Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-started/](https://docs.hi-framework.org/1.1.0/getting-started/index.html "Hi-Framework docs")
 
 # 1.1.0 Changes
+## Miscellaneous
 * i18n support added
 * @Template 
 * Frontiers timeout control via hi.xml and @Timeout
