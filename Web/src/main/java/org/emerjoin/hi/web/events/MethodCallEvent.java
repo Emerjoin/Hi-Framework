@@ -12,6 +12,7 @@ public abstract class MethodCallEvent extends InvocationEvent {
 
     private Class<? extends Controller> clazz = null;
     private Method method = null;
+    private boolean canceled = false;
 
     public MethodCallEvent(boolean isAfter) {
         super(isAfter);
@@ -38,4 +39,22 @@ public abstract class MethodCallEvent extends InvocationEvent {
     public void setMethod(Method method) {
         this.method = method;
     }
+
+    public void interrupt(){
+
+        if(!this.isBefore())
+            throw new IllegalArgumentException("Interrupt is only available before");
+
+        this.canceled = true;
+
+    }
+
+    public boolean wasInterrupted(){
+
+        return this.canceled;
+
+    }
+
+
+
 }
