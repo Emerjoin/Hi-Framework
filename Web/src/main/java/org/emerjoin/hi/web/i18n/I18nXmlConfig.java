@@ -20,7 +20,6 @@ public class I18nXmlConfig implements Configurator {
 
     private static final String ENABLE_CONCATENATION_ELEMENT = "enable-concatenation";
     private static final String CACHE_CLASS_NAME_ELEMENT = "cache";
-    private static final String UNICODE_ENCODING_ELEMENT = "unicode-encoding";
     private static final String ENABLE_MAPPINGS_ELEMENT = "enable-mappings";
     private static final String DISABLE_BUNDLE_EXPORTATION_ELEMENT = "disable-full-bundle-exportation";
 
@@ -67,7 +66,6 @@ public class I18nXmlConfig implements Configurator {
 
         configureConcatenation(i18nXml,configuration);
         configureCaching(i18nXml,configuration);
-        configureUnicode(i18nXml,configuration);
         configureMappings(i18nXml,configuration);
 
         validateConfig(configuration);
@@ -94,14 +92,6 @@ public class I18nXmlConfig implements Configurator {
 
     }
 
-
-    private void configureUnicode(XMLEasy i18nXml, I18nConfiguration configuration){
-
-        if(i18nXml.hasChild(UNICODE_ENCODING_ELEMENT))
-            configuration.setEncodingUTF8(Boolean.parseBoolean(i18nXml
-                    .child(UNICODE_ENCODING_ELEMENT).getContent()));
-
-    }
 
 
     private void configureMappings(XMLEasy i18nXml, I18nConfiguration configuration){
