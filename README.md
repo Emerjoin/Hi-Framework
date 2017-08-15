@@ -12,9 +12,14 @@ Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-st
 * Frontiers timeout control via hi.xml and @Timeout
 * Hi-es5.js obfuscated in PRODUCTION mode
 * ajaxify now sets href=javascript:void(0)
+* if-dev attribute
+* Deprecated: Template.getMarkup(), Template.setMarkup(markup)
+
 ## New APIS
 * Hi.reload(args)
 * FrontierRequestEvent.overrideResult(value)
 * FrontierRequestEvent.interupt()
 * ControllerRequestEvent.interupt()
 * FrontEnd.putOnTemplate(key, value)
+* TransformEvent
+* ViewTransformEvent
