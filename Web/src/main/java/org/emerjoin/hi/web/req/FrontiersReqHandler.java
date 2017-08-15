@@ -254,6 +254,13 @@ public class FrontiersReqHandler extends ReqHandler {
     }
 
 
+    private void handleOverride(FrontierRequestEvent event,FrontierInvoker invoker){
+
+        if(event.valueOverriden())
+            invoker.setReturnedObject(event.getOverrideValue());
+
+    }
+
     private boolean executeFrontier(FrontierInvoker invoker, FrontierMethod method,
                                     FrontierClass clazz) throws Exception{
 
@@ -263,9 +270,16 @@ public class FrontiersReqHandler extends ReqHandler {
         req.setClazz(clazz.getFrontierClazz());
 
         frontierRequestEvent.fire(req);
+
+        if(req.wasInterrupted()) {
+            handleOverride(req,invoker);
+            return true;
+        }
+
         boolean result  = invoker.invoke();
         req.setAfter();
         frontierRequestEvent.fire(req);
+        handleOverride(req,invoker);
         return result;
 
     }
