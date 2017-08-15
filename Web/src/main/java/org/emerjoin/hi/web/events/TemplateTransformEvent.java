@@ -5,19 +5,17 @@ import org.emerjoin.hi.web.Template;
 /**
  * @author Mário Júnior
  */
-public class TemplateTransformEvent extends HiEvent {
+public class TemplateTransformEvent extends TransformEvent {
 
-    private Template template;
+    public TemplateTransformEvent(Template template){
 
-    public TemplateTransformEvent(String name, String content){
-        super();
-        this.template = new Template(name,content);
+        super(template);
 
     }
 
     public Template getTemplate(){
 
-        return template;
+        return (Template) getTransformable();
 
     }
 
