@@ -23,3 +23,4 @@ Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-st
 * FrontEnd.putOnTemplate(key, value)
 * TransformEvent
 * ViewTransformEvent
+* Frontiers faking support: Hi.$test.MockCall
