@@ -91,23 +91,41 @@ Hi.$util = {};
 Hi.$test = {};
 
 
-Hi.$test.fakeFrontierPromise = function(){
+Hi.$test.configs = {};
+Hi.$test.configs.frontiers = {};
+Hi.$test.configs.frontiers.delay = 0;
 
 
+Hi.$test.configs.frontiers.evalTimeout = 50;
+Hi.$test.getMockCallTimeout = function(){
+
+    var delay = Hi.$test.configs.frontiers.delay;
+    var timeout = Hi.$test.configs.frontiers.evalTimeout;
+
+    if(delay>0)
+        return delay;
+
+    return timeout;
 
 };
 
-Hi.$test.MockCall = function(){
+
+Hi.$test.MockCall = function(timeout){
+
+    this.result = function(callable){
+        var time = Hi.$test.getMockCallTimeout();
+        if(typeof timeout!="undefined" && timeout>0)
+            time = timeout;
+
+        setTimeout(callable,time);
+    };
 
     this.success = function(data){
 
         var promise = new Hi.$frontiers.Promise();
-        promise.run = function(){
-
+        this.result(function(){
             promise._setResult(data);
-            return promise;
-
-        };
+        });
 
         return promise;
 
@@ -117,18 +135,49 @@ Hi.$test.MockCall = function(){
     this.error = function(error){
 
         var promise = new Hi.$frontiers.Promise();
-        promise.run = function(){
 
+        this.result(function(){
             promise._setException(error);
-
-            return promise;
-
-        };
+        });
 
         return promise;
     };
 
-    //TODO: Test other situations: overrequest, timeout, etc
+
+    this.timeout = function(){
+
+        var promise = new Hi.$frontiers.Promise();
+
+        this.result(function(){
+            promise._setTimedOut();
+        });
+
+        return promise;
+    };
+
+
+    this.forbidden = function(){
+
+        var promise = new Hi.$frontiers.Promise();
+
+        this.result(function(){
+            promise._setForbidden();
+        });
+
+        return promise;
+    };
+
+
+    this.overrequest = function(){
+
+        var promise = new Hi.$frontiers.Promise();
+
+        this.result(function(){
+            promise._setOverRequest();
+        });
+
+        return promise;
+    };
 
 };
 
@@ -2466,33 +2515,6 @@ Hi.$frontiers.Promise = function(){
 
     };
 
-    this._setOffline = function(){
-
-        var gOfflineHandler = getGlobalHandler("offline");
-        var gErrorHandler = getGlobalHandler("catch");
-
-        if(typeof offlineCallback=="function") {
-
-            offlineCallback.call(this);
-
-        }else if(typeof gOfflineHandler=="function"){
-
-            gOfflineHandler.call(getGlobalHandlers(),this);
-
-        }else if(typeof catchCallback=="function"){
-
-            this._setHttpError(0);
-
-        }else if(typeof gErrorHandler=="function"){
-
-            gErrorHandler.call(getGlobalHandlers(),this,0);
-
-        }
-
-        this._setRequestFinished();
-
-    };
-
     this._setForbidden = function(){
 
         var gForbiddenHandler = getGlobalHandler("forbidden");
@@ -2661,15 +2683,6 @@ Hi.$frontiers.Promise = function(){
 
     };
 
-    this.offline = function(callback){
-
-        if(typeof callback!="function")
-            throw new Error("Wrong parameters");
-
-        offlineCallback = callback;
-        return this;
-
-    };
 
     this.interrupted = function(callback){
 
@@ -2926,49 +2939,71 @@ Hi.i18n.init = function(){
 
 Hi.i18n.get = function(key){
     if(!Hi.i18n.dictionary.hasOwnProperty(key))
-        return key;
+        return false;
 
     return Hi.i18n.dictionary[key];
 };
 
-Hi.i18n.format = function(key, values){
-
-    key = Hi.i18n.get(key);
+Hi.i18n.format = function(target, values){
 
     for(var  propKey in values){
         var ngKey = "{{"+propKey+"}}";
         var propValue = values[propKey];
-        key = key.split(ngKey).join(propValue);
+        target = target.split(ngKey).join(propValue);
     }
 
-    return key;
+    return target;
 
 };
 
 
-Hi.i18n.TranslatePromise = function(key){
+Hi.i18n.ExpressionPromise = function(target){
 
     this.with = function(values){
 
-        return Hi.i18n.format(key,values);
+        return Hi.i18n.format(target,values);
 
     }
 
 };
 
+Hi.i18n.isExpression = function(value){
 
-function translate(key){
+    return value.indexOf("{{")!=-1&&value.indexOf("}}")!=-1;
 
-    if(key.indexOf("{{")!=-1&&key.indexOf("}}")!=-1)
-        return new Hi.i18n.TranslatePromise(key);
 
-    return Hi.i18n.get(key);
+};
+
+
+function translate(value, key){
+    var src = value;
+
+    if(typeof key!="undefined")
+        src = key;
+
+    var translated = Hi.i18n.get(src);
+
+    //Failed to translate
+    if(!translated){
+
+        if(Hi.i18n.isExpression(value))
+            return new Hi.i18n.ExpressionPromise(value);
+
+        return value;
+
+    }
+
+    if(Hi.i18n.isExpression(translated))
+        return new Hi.i18n.ExpressionPromise(translated);
+
+    return translated ;
 
 }
 
-function __t(string,key){
+function __t(value,key){
 
-    return translate(key);
+    return translate(value,key);
+
 
 }
 
@@ -3080,9 +3115,6 @@ var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fa
                         break;
                     case 429:
                         promisse._setOverRequest();
-                        break;
-                    case   0:
-                        promisse._setOffline();
                         break;
                     default :
                         promisse._setException(500);
