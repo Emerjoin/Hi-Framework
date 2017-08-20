@@ -1,5 +1,6 @@
 package org.emerjoin.hi.web.i18n;
 
+import org.emerjoin.hi.web.BootstrapUtils;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.jarex.Jarex;
 import org.emerjoin.jarex.ResultsWrapper;
@@ -61,6 +62,16 @@ public class I18nStarter {
             throw new I18nException("Failed to load the i18n-mappings.xsd resource",ex);
 
         }
+
+    }
+
+
+    public static I18nStarter createInstance(ServletContext servletContext,
+                                             I18nConfiguration configuration){
+
+        Set<URL> libraries = BootstrapUtils.getLibraries(servletContext);
+        return  new I18nStarter(configuration,
+                libraries,servletContext);
 
     }
 
@@ -129,7 +140,7 @@ public class I18nStarter {
                 LOG.info(String.format("Loading I18n mappings for [%s]",path));
                 XMLEasy xml = XMLEasy.easy(view);
                 getMappedDictionaries(xml.streamChildren(),lang)
-                        .forEach(url -> i18nMappingsInfo.addViewMapping(path,url));
+                        .forEach(url -> i18nMappingsInfo.addViewMapping("/"+path,url));
 
             });
         }).otherwise(()->LOG.info("No views i18n mappings found!")).eval();
@@ -294,6 +305,13 @@ public class I18nStarter {
     private void setDefaultI18nCache(){
 
         i18nCache = new DefaultI18nCache();
+
+    }
+
+
+    public void reload(){
+
+        this.start();
 
     }
 

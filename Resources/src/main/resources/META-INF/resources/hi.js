@@ -735,7 +735,6 @@ Hi.$angular.run = function(){
                 else{
 
                     Hi.$ui.html.cache.destroy();
-                    Hi.i18n.cache.destroy();
 
                 }
 
@@ -746,7 +745,6 @@ Hi.$angular.run = function(){
                     //Not the same deploy Id
                     if (oldDeployId != App.deployId) {
                         Hi.$ui.html.cache.destroy();
-                        Hi.i18n.cache.destroy();
                     }
 
                 }
@@ -1419,7 +1417,6 @@ Hi.$ui.js.commands.set('$url',function(data){
 Hi.$ui.js.commands.set("$reloadLanguage",function(data){
 
     Hi.$ui.html.cache.destroy();
-    Hi.i18n.cache.destroy();
     document.location.reload();
 
 });
@@ -1457,13 +1454,10 @@ Hi.$ui.js.setScopeProps = function(context,context_variables){
     if(context_variables.hasOwnProperty("$dictionary")){
 
         var dictionary = context_variables["$dictionary"];
-        for(var key in dictionary){
-            if(dictionary.hasOwnProperty(key))
-                Hi.i18n.dictionary[key] = dictionary[key];
-        }
+        Hi.i18n.reset();
+        Hi.i18n.export(dictionary);
 
         delete context_variables["$dictionary"];
-        delete context_variables["$dictionary-no-cache"];
     }
 
     for(var root_variable_name in UIRoot){
@@ -1921,13 +1915,6 @@ Hi.$nav.navigateTo = function(route_name_or_object,getParams,embed,callback,$emb
         }
 
 
-        if(Hi.i18n.cache.hasDictionary(cachingURL)){
-
-            server_directives["Ignore-i18nMapping"] = 'true';
-
-        }
-
-
         if(embed){
 
             route_object.embedded = true;
@@ -1961,12 +1948,6 @@ Hi.$nav.navigateTo = function(route_name_or_object,getParams,embed,callback,$emb
             }
 
             var context_variables = server_response.data;
-
-            if(context_variables.hasOwnProperty("$dictionary")&&!context_variables.hasOwnProperty("$dictionary-no-cache")){
-
-                Hi.i18n.cache.put(cachingURL,context_variables["$dictionary"]);
-
-            }
 
             //Commands to be executed on the client-side
             if(context_variables.hasOwnProperty('$invoke')){
@@ -2856,92 +2837,51 @@ window.onpopstate = function(event){
 
 //Internationalization
 Hi.i18n = {};
-Hi.i18n.dictionary = {};
-Hi.i18n.cache = {};
-Hi.i18n.cache.key = "";
-Hi.i18n.cache.get = function(){
+Hi.i18n.exported = {};
 
-    if(typeof localStorage!="undefined"){
-        if(!localStorage.hasOwnProperty(Hi.i18n.cache.key))
-            return {$zero:true};
-        return JSON.parse(localStorage[Hi.i18n.cache.key]);
 
+Hi.i18n.reset = function(){
+
+    delete Hi.i18n["exported"];
+    Hi.i18n.exported = {};
+
+    if(typeof $i18nTemplateBundle!="undefined"){
+        Hi.i18n.export($i18nTemplateBundle);
     }
 
-    return {$zero:true};
+    if(typeof $i18nBundle !="undefined"){
+        Hi.i18n.export($i18nBundle);
+    }
 };
 
 
-Hi.i18n.cache.hasDictionary = function(name){
+Hi.i18n.export = function(dictionary){
 
-    return Hi.i18n.cache.get().hasOwnProperty(name);
+    for(var k in dictionary){
 
-};
+        if(dictionary.hasOwnProperty(k)){
 
-Hi.i18n.cache.put = function(name,dictionary){
-    var cache = Hi.i18n.cache.get();
-    cache[name] = dictionary;
-    Hi.i18n.cache.update(cache);
-};
+            Hi.i18n.exported[k] = dictionary[k];
 
-Hi.i18n.cache.update = function(cache){
-
-    if(typeof App == "undefined")
-        return;
-
-    if(App.deployMode == "DEVELOPMENT")
-        return;
-
-    if(cache.hasOwnProperty("$zero"))
-        delete cache["$zero"];
-
-    if(typeof localStorage!="undefined"){
-        localStorage[Hi.i18n.cache.key] = JSON.stringify(cache);
+        }
     }
 
 };
 
-Hi.i18n.cache.load = function(){
 
-    Hi.i18n.dictionary = Hi.i18n.cache.get();
-
-};
-
-Hi.i18n.cache.destroy = function(){
-    if(typeof localStorage!="undefined"){
-        if(!localStorage.hasOwnProperty(Hi.i18n.cache.key))
-            return;
-        delete localStorage[Hi.i18n.cache.key];
-    }
-};
 
 Hi.i18n.init = function(){
 
-    Hi.i18n.cache.key = "i18n-"+App.base64_url;
-    var cache =  Hi.i18n.cache.get();
-    if(cache.hasOwnProperty("$zero")){
+    Hi.i18n.reset();
 
-        if(typeof $i18nTemplateBundle!="undefined"){
-            Hi.i18n.dictionary = $i18nTemplateBundle;
-        }
-
-        if(typeof $i18nBundle !="undefined"){
-            Hi.i18n.dictionary = $i18nBundle;
-        }
-
-    }else{
-
-        Hi.i18n.dictionary = cache;
-
-    }
 
 };
 
 Hi.i18n.get = function(key){
-    if(!Hi.i18n.dictionary.hasOwnProperty(key))
+    if(!Hi.i18n.exported.hasOwnProperty(key))
         return false;
 
-    return Hi.i18n.dictionary[key];
+    return Hi.i18n.exported[key];
 };
 
 Hi.i18n.format = function(target, values){

@@ -412,30 +412,28 @@ public class HTMLizer {
 
             if(I18nRuntime.isReady()){
 
+                Map<String,String> dictionary = new HashMap<>();
+
                 I18nRuntime runtime = I18nRuntime.get();
                 if(runtime.getConfiguration().isMappingsEnabled()) {
-                    //Export the dictionary mapped to the current route
 
+                    //Export the dictionary mapped to the current route
                     if (runtime.hasDictionary(mappedPath)) {
                         _log.debug(String.format("Exporting language dictionaries mapped to path : [%s]",mappedPath));
-                        Map<String,String> dictionary = runtime.getDictionary(mappedPath);
-                        viewData.put("$dictionary", dictionary);
-                    }else{
-
-                        _log.warn(String.format("No dictionary mapped to path [%s]",mappedPath));
-
-                    }
-
-                }else{
-
-                    Map<String,String> dictionary = i18nContext.collect();
-                    if(dictionary.size()>0){
-                        _log.debug(String.format("Exporting %d dictionary terms",dictionary.size()));
-                        viewData.put("$dictionary", dictionary);
-                        viewData.put("$dictionary-no-cache",true);
-                    }
+                        dictionary.putAll(runtime.getDictionary(mappedPath));
+                    }else _log.warn(String.format("No dictionary mapped to path [%s]",mappedPath));
 
                 }
+
+                //Full bundle exportation disabled
+                if(!runtime.getConfiguration().isExportLanguageBundle()){
+                    dictionary.putAll(i18nContext.collect());
+                    if(dictionary.size()>0)
+                        _log.debug(String.format("Exporting %d dictionary terms",dictionary.size()));
+                }
+
+                viewData.put("$dictionary", dictionary);
+
             }
 
         }else{

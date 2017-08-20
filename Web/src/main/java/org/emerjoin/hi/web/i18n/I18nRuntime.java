@@ -20,6 +20,7 @@ public class I18nRuntime {
     private DOMTranslator DOMTranslator = null;
     private boolean underDevelopment = false;
     private I18nConfiguration configuration;
+    private String activeLanguage = null;
 
     private I18nRuntime(){
 
@@ -44,14 +45,19 @@ public class I18nRuntime {
     }
 
     protected static void init(I18nStarter i18NStarter, AppConfigurations configurations){
-        if(I18nRuntime.instance!=null)
-            throw new I18nException("I18nRuntime already initialized");
+
+        String currentLang = null;
+        if(instance!=null)
+            currentLang = instance.activeLanguage;
 
         I18nRuntime.instance = new I18nRuntime();
         instance.bundles = i18NStarter.getBundles();
         instance.cache = i18NStarter.getI18nCache();
         instance.underDevelopment  = configurations.underDevelopment();
         instance.configuration = i18NStarter.getConfiguration();
+
+        if(currentLang!=null)
+            instance.setLanguage(currentLang);
 
 
     }
@@ -66,6 +72,7 @@ public class I18nRuntime {
 
         this.currentLanguage.set(lang);
         this.currentBundle.set(bundles.get(lang));
+        this.activeLanguage = lang;
 
     }
 

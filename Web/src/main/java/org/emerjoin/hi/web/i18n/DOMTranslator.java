@@ -5,6 +5,8 @@ import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,9 +16,7 @@ import java.util.stream.Collectors;
  */
 public class DOMTranslator {
 
-    public DOMTranslator(){
-
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(DOMTranslator.class);
 
     public void translateFragment(Document fragment, LanguageBundle bundle){
         if(fragment==null)
@@ -24,7 +24,7 @@ public class DOMTranslator {
         if(bundle==null)
             throw new IllegalArgumentException("LanguageBundle instance must not be null");
 
-        Elements elements = fragment.select("[translate]");
+        Elements elements = fragment.select("[^translate]");
         for(Element element : elements)
             translateElement(element,bundle);
 
@@ -35,38 +35,13 @@ public class DOMTranslator {
         Attributes attributes = node.attributes();
         List<Attribute> attributesList = attributes.asList()
                 .parallelStream()
-                .filter((attribute -> attribute.getKey().startsWith("translate-")))
+                .filter((attribute -> attribute.getKey().startsWith("translate")))
                 .collect(Collectors.toList());
-
-        //Translate inner HTML
-        if(attributesList.size()==0){
-
-            String translateAttrValue = node.attr("translate");
-            if(translateAttrValue.isEmpty()){
-                //Translate content directly
-                String htmlTranslated = bundle.translate(node.html());
-                if(htmlTranslated!=null)//HTML content translated successfully
-                    node.html(htmlTranslated);
-
-                node.removeAttr("translate");
-                return;
-            }
-
-            //Translate inner HTML using a key
-            String translatedKey = bundle.translate(translateAttrValue);
-            if(translatedKey!=null)//Key translated successfully
-                node.html(translatedKey);
-
-            node.removeAttr("translate");
-            return;
-        }
 
         for(Attribute attribute: attributesList) {
             translateAttribute(attribute, node, bundle);
             node.removeAttr(attribute.getKey());//Remove the attribute
         }
-
-        node.removeAttr("translate");
 
     }
 
@@ -74,6 +49,26 @@ public class DOMTranslator {
     private void translateAttribute(Attribute attribute, Element element, LanguageBundle bundle){
         String name = attribute.getKey();
         int firstHyphenIndex = name.indexOf('-');
+
+        //Translate inner HTML
+        if(firstHyphenIndex==-1){
+
+            String translateKey = attribute.getValue();
+
+            //inner HTML
+            if(translateKey==null||translateKey.isEmpty())
+                translateKey = element.html();
+
+            if(translateKey.isEmpty())
+                return;
+
+            String translated = bundle.translate(translateKey);
+            if(translated!=null)
+                element.html(translated);
+            return;
+
+        }
+
         String targetAttrName = name.substring(firstHyphenIndex+1,name.length());
 
         if(attribute.getValue()!=null&&!attribute.getValue().isEmpty()){
@@ -88,6 +83,9 @@ public class DOMTranslator {
 
         //Translate the value of the target attribute
         String targetAttrValue = element.attr(targetAttrName);
+        if(targetAttrValue.isEmpty())
+            return;
+
         String translatedValue = bundle.translate(targetAttrValue);
 
         if(translatedValue!=null)//Value translated successfully

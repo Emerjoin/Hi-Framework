@@ -3,6 +3,7 @@ package org.emerjoin.hi.web.boot;
 import org.emerjoin.hi.web.BootstrapUtils;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.ConfigProvider;
+import org.emerjoin.hi.web.events.TemplateLoadEvent;
 import org.emerjoin.hi.web.i18n.I18nXmlConfig;
 import org.emerjoin.hi.web.exceptions.HiException;
 import org.emerjoin.hi.web.i18n.I18nStarter;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -44,6 +46,13 @@ public class BootAgent {
 
     @Inject
     private ConfigProvider configProvider;
+
+    @Inject
+    private ServletContext context;
+
+    private Optional<I18nConfiguration> i18nConfiguration;
+
+    private I18nStarter starter = null;
 
 
     public BootAgent(){}
@@ -191,17 +200,15 @@ public class BootAgent {
 
     private void initI18n(){
 
-        Optional<I18nConfiguration> configuration = I18nXmlConfig.getConfiguration();
-        if(!configuration.isPresent()) {
+        i18nConfiguration = I18nXmlConfig.getConfiguration();
+        if(!i18nConfiguration.isPresent()) {
             _log.info("I18n not enabled. Skipping");
             return;
         }
 
         _log.info("I18n enabled. Initializing...");
-        Set<URL> libraries = BootstrapUtils.getLibraries(servletContext);
-        I18nStarter i18NStarter = new I18nStarter(configuration.get(),libraries,servletContext);
-        i18NStarter.start();
-
+        starter = I18nStarter.createInstance(servletContext,i18nConfiguration.get());
+        starter.start();;
 
     }
 
@@ -211,5 +218,18 @@ public class BootAgent {
 
     }
 
+
+
+    public void reloadI18n(@Observes TemplateLoadEvent reload){
+
+        if(!i18nConfiguration.isPresent()||!AppConfigurations.get().underDevelopment())
+            return;
+
+
+        _log.debug("Reloading I18n dictionaries...");
+        starter.reload();
+
+
+    }
 
 }
