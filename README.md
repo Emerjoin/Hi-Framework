@@ -19,11 +19,13 @@ Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-st
 
 ```
 
-* New instance and static methods introduced to __AppContext__:
+* New instance and static methods introduced to __AppContext__:<br>
+```java
 	=> Gson createGsonInstance();
 	=> GsonBuilder getGsonBuilderInstance();
 	=> static GsonBuilder getGsonBuilder()
 	=> static Gson createGson();
 	=> static void setGsonBuilder(GsonBuilder builder)
+```
 
 
