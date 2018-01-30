@@ -5,22 +5,25 @@ It's a light Java Framework that allows developers to write fully Ajax web appli
 # Need some guidance?
 Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-started/](https://docs.hi-framework.org/1.1.0/getting-started/index.html "Hi-Framework docs")
 
-# 1.1.0 Changes
-## Miscellaneous
-* i18n support added
-* @Template 
-* Frontiers timeout control via hi.xml and @Timeout
-* Hi-es5.js obfuscated in PRODUCTION mode
-* ajaxify now sets href=javascript:void(0)
-* if-dev attribute
-* Deprecated: Template.getMarkup(), Template.setMarkup(markup)
+# 1.2.0 Changes
+## Gson
+* GsonInitEvent introduced - event that allows to set configurations on GsonBuilder:
 
-## New APIS
-* Hi.reload(args)
-* FrontierRequestEvent.overrideResult(value)
-* FrontierRequestEvent.interupt()
-* ControllerRequestEvent.interupt()
-* FrontEnd.putOnTemplate(key, value)
-* TransformEvent
-* ViewTransformEvent
-* Frontiers faking support: Hi.$test.MockCall
+```java
+
+	public void configureGson(@Observes GsonInitEvent event) {
+		
+		GsonBuilder builder = event.getBuilder();
+		
+	}
+
+```
+
+* New instance and static methods introduced to __AppContext__:
+	=> Gson createGsonInstance();
+	=> GsonBuilder getGsonBuilderInstance();
+	=> static GsonBuilder getGsonBuilder()
+	=> static Gson createGson();
+	=> static void setGsonBuilder(GsonBuilder builder)
+
+
