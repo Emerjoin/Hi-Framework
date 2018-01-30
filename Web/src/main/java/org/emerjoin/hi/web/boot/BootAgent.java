@@ -1,5 +1,6 @@
 package org.emerjoin.hi.web.boot;
 
+import org.emerjoin.hi.web.AppContext;
 import org.emerjoin.hi.web.BootstrapUtils;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.ConfigProvider;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -187,6 +189,10 @@ public class BootAgent {
         this.servletContext = context;
         this.servletConfig = config;
 
+        //Initialize the app context instance
+        AppContext appContext = CDI.current().select(AppContext.class).get();
+        appContext.getGsonBuilderInstance();
+
         makeDeployId(); //Set deploy Id
         loadConfigs(); //Load App configurations
         initI18n(); //Start I18n
@@ -195,6 +201,8 @@ public class BootAgent {
         scriptLibrary.init(servletContext);//Load scripts and generate frontiers
         router.init(servletContext,servletConfig); //Register requests handlers
         initBootExtensions(); //Load and execute boot extensions
+
+
     }
 
 

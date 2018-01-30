@@ -180,7 +180,7 @@ public class HTMLizer {
         CharSequence http = "http://";
         CharSequence https = "https://";
         AppContext appContext = CDI.current().select(AppContext.class).get();
-        Gson gson = new Gson();
+        Gson gson = AppContext.createGson();
 
         Map map = new HashMap();
         map.put("base_url", requestContext.getBaseURL());
@@ -307,7 +307,7 @@ public class HTMLizer {
         }
 
         template = transformHeadAndBody(template,loaderJavascript,loaderJSContent);
-        Gson gson = new GsonBuilder().create();
+        Gson gson = AppContext.createGson();
         String viewDataStr = null;
 
         try{

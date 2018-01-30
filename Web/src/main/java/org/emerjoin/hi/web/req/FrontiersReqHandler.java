@@ -71,8 +71,6 @@ public class FrontiersReqHandler extends ReqHandler {
 
     private Base64.Decoder decoder = Base64.getDecoder();
 
-    { gson = new Gson(); }
-
     private Object getParamValue(String frontier,FrontierMethod frontierMethod, MethodParam methodParam,
                                  Map<String,Object> uploadsMap,Map<String,Object> argsMap,
                                  HttpServletRequest request) throws FrontierCallException{
@@ -188,7 +186,7 @@ public class FrontiersReqHandler extends ReqHandler {
             while (argsScanner.hasNextLine())
                 argsJSONStringBuilder.append(argsScanner.nextLine());
 
-            Gson gson = new Gson();
+            Gson gson = AppContext.createGson();
             Map<String,Object> uploadsMap = gson.fromJson(uploadsJSONStringBuilder.toString(),Map.class);
             Map<String,Object> argsMaps = gson.fromJson(argsJSONStringBuilder.toString(),Map.class);
             MethodParam methodParams[] = frontierMethod.getParams();
@@ -392,7 +390,8 @@ public class FrontiersReqHandler extends ReqHandler {
     @PostConstruct
     private void handlerReady(){
 
-        log = LoggerFactory.getLogger(FrontiersReqHandler.class);
+        this.gson = AppContext.createGson();
+        this.log = LoggerFactory.getLogger(FrontiersReqHandler.class);
 
     }
 

@@ -37,7 +37,7 @@ public class ES5ReqHandler extends ReqHandler {
     @PostConstruct
     public void init(){
 
-        this.gson = new Gson();
+        this.gson = AppContext.createGson();
 
     }
 
