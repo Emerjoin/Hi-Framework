@@ -7,5 +7,5 @@ Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-st
 
 # 1.2.1 Changes
 ## Routing
-* An bug that would cause Hi-Framework to return HTTP 20 for a Request that failed to be routed.
+* An bug that would cause Hi-Framework to return HTTP 200 for a Request that failed to be routed.
 * More warning logs introduced on for frontiers routing to help developers identity request failure causes
