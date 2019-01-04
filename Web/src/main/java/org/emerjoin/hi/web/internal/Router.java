@@ -89,15 +89,21 @@ public class Router {
     }
 
     public int doRoute(RequestContext requestContext, String routeURL, boolean isPost) throws ServletException, IOException{
-
         boolean handled = false;
-
         if(wasPreviouslyMatched(routeURL)){
-
             ReqHandler reqHandler = ReqHandler.getHandler(getPreviouslyMatchedHandler(routeURL));
-            reqHandler.handle(requestContext);
-            return 200;
+            try {
+                if (!reqHandler.handle(requestContext)) {
+                    requestContext.getResponse().sendError(404);
+                    return 404;
+                }
+            }catch (ServletException ex){
+                throw ex;
 
+            }catch (Throwable ex){
+                throw new ServletException(ex);
+            }
+            return 200;
         }
 
 

@@ -313,6 +313,7 @@ public class FrontiersReqHandler extends ReqHandler {
         exception.put("type",ex.getClass().getSimpleName());
 
         JsonObject jsonObject = gson.toJsonTree(throwable).getAsJsonObject();
+        jsonObject.remove("cause");
         jsonObject.remove("stackTrace");
         jsonObject.remove("suppressedExceptions");
         jsonObject.remove("target");
@@ -380,10 +381,17 @@ public class FrontiersReqHandler extends ReqHandler {
     private boolean isAuthenticRequest(RequestContext requestContext){
 
         String token = requestContext.getRequest().getHeader("csrfToken");
-        if(token==null)
+        if(token==null) {
+            log.warn("CSRF Token Header missing on Request");
             return false;
+        }
 
-        return token.equals(activeUser.getCsrfToken());
+        if(!token.equals(activeUser.getCsrfToken())){
+            log.warn("Invalid Request CSRF Token");
+            return false;
+        }
+
+        return true;
 
     }
 
@@ -397,20 +405,28 @@ public class FrontiersReqHandler extends ReqHandler {
 
     @Override
     public boolean handle(RequestContext requestContext) throws ServletException, IOException {
-        if(!isAuthenticRequest(requestContext))
+        if(!isAuthenticRequest(requestContext)) {
+            log.warn("Not an authentic Request");
             return false;
+        }
 
         String[] frontierPair = getFrontierPair(requestContext);
         String invokedClass = frontierPair[0];
         String invokedMethod = frontierPair[1];
-        if(invokedClass==null||invokedMethod==null)
-            return false;
+        if(invokedClass==null||invokedMethod==null) {
+            log.warn("Frontier class and method names not found");
+            requestContext.getResponse().sendError(400);
+            return true;
+        }
 
-        if(!frontierExists(invokedClass))
+        if(!frontierExists(invokedClass)) {
+            log.warn("Frontier not found");
             return false;
+        }
 
         FrontierClass frontierClass = getFrontier(invokedClass);
         if(!frontierClass.hasMethod(invokedMethod)) {
+            log.warn("Frontier method not found");
             return false;
         }
 
@@ -422,10 +438,10 @@ public class FrontiersReqHandler extends ReqHandler {
         try {
 
             if(!accessGranted(frontierClass.getObject().getClass(),frontierMethod.getMethod())){
+                log.warn("Access to frontier method denied");
                 requestContext.getResponse().sendError(403);
                 return true;
             }
-
             invocationOK = executeFrontier(frontierInvoker,frontierMethod,frontierClass);
 
         }catch (Exception ex){

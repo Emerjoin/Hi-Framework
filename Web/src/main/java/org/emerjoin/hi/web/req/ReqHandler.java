@@ -69,70 +69,40 @@ public abstract class ReqHandler {
     }
 
     public static boolean matches(RequestContext requestContext, Class<? extends ReqHandler> reqHandler, boolean post) throws ReqMatchException{
-
-
-
         Annotation annotation = reqHandler.getDeclaredAnnotation(HandleRequests.class);
         if(annotation==null){
-
             throw new ReqMatchException(reqHandler.getCanonicalName(),"handler <"+reqHandler.getCanonicalName()+"> is not annoted");
-
         }
-
-
         String url = requestContext.getRouteUrl();
         HandleRequests handleRequests = (HandleRequests) annotation;
-
         if(post){
-
-
             if(!handleRequests.supportPostMethod()){
-
                 return false;
-
             }
-
         }
-
-
         String regex = handleRequests.regexp();
         try {
-
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(url);
             return matcher.matches();
-
-
         }catch (Exception ex){
 
             throw new ReqMatchException(reqHandler.getCanonicalName(), "handler <"+reqHandler.getCanonicalName()+"> has an invalid match regular expression");
 
         }
-
-
     }
 
     private static boolean checkPermission(Granted granted, RequestContext requestContext){
-
         if(granted.value().length==0)
             return true;
-
         boolean allowed = false;
-
         for(String role : granted.value()){
-
             if(requestContext.getRequest().isUserInRole(role)){
-
                 allowed = true;
                 break;
-
             }
-
         }
-
-
         return allowed;
-
     }
 
 
