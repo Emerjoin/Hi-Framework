@@ -5,27 +5,7 @@ It's a light Java Framework that allows developers to write fully Ajax web appli
 # Need some guidance?
 Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-started/](https://docs.hi-framework.org/1.1.0/getting-started/index.html "Hi-Framework docs")
 
-# 1.2.0 Changes
-## Gson
-* GsonInitEvent introduced - event that allows to set configurations on GsonBuilder:
-
-```java
-
-	public void configureGson(@Observes GsonInitEvent event) {
-		
-		GsonBuilder builder = event.getBuilder();
-		
-	}
-
-```
-
-* New instance and static methods introduced to __AppContext__:<br>
-```java
-	=> Gson createGsonInstance();
-	=> GsonBuilder getGsonBuilderInstance();
-	=> static GsonBuilder getGsonBuilder()
-	=> static Gson createGson();
-	=> static void setGsonBuilder(GsonBuilder builder)
-```
-
-
+# 1.2.1 Changes
+## Routing
+* An bug that would cause Hi-Framework to return HTTP 20 for a Request that failed to be routed.
+* More warning logs introduced on for frontiers routing to help developers identity request failure causes
