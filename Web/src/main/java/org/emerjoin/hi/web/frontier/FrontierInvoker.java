@@ -36,22 +36,30 @@ public class FrontierInvoker {
 
     }
 
-    public boolean invoke() throws Exception {
-
+    public Object[] getCallArguments(){
         MethodParam methodParams[] = method.getParams();
-        Object[] invocationParams = new Object[params.size()];
-
+        Object[] callParams = new Object[params.size()];
         int i = 0;
         for(MethodParam methodParam: methodParams){
             Object paramValue = params.get(methodParam.getName());
-            invocationParams[i] = paramValue;
+            callParams[i] = paramValue;
             i++;
         }
+        return callParams;
+    }
+
+    public boolean invoke() throws Exception {
+
+        return this.invoke(getCallArguments());
+
+    }
+
+    public boolean invoke(Object[] arguments) throws Exception {
 
         Object refreshedObj = frontier.getObject();
         try {
 
-            returnedObject = method.getMethod().invoke(refreshedObj, invocationParams);
+            returnedObject = method.getMethod().invoke(refreshedObj, arguments);
 
         }catch (Throwable ex){
 

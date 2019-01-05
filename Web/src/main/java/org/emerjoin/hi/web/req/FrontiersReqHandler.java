@@ -266,6 +266,7 @@ public class FrontiersReqHandler extends ReqHandler {
         req.setBefore();
         req.setMethod(method.getMethod());
         req.setClazz(clazz.getFrontierClazz());
+        req.setArguments(invoker.getCallArguments());
 
         frontierRequestEvent.fire(req);
 
@@ -274,7 +275,7 @@ public class FrontiersReqHandler extends ReqHandler {
             return true;
         }
 
-        boolean result  = invoker.invoke();
+        boolean result  = invoker.invoke(req.getArguments());
         req.setAfter();
         frontierRequestEvent.fire(req);
         handleOverride(req,invoker);

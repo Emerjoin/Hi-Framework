@@ -7,9 +7,20 @@ package org.emerjoin.hi.web.events;
 public class FrontierRequestEvent extends MethodCallEvent {
 
     private Object override = null;
+    private Object[] arguments;
 
     public FrontierRequestEvent(boolean isAfter) {
         super(isAfter);
+    }
+
+    public FrontierRequestEvent(boolean isAfter, Object[] arguments){
+        super(isAfter);
+        this.arguments = arguments;
+    }
+
+    public FrontierRequestEvent(Object[] arguments){
+        super();
+        this.arguments = arguments;
     }
 
     public FrontierRequestEvent(){
@@ -25,6 +36,13 @@ public class FrontierRequestEvent extends MethodCallEvent {
 
     }
 
+    public Object[] getArguments() {
+        return arguments;
+    }
+
+    public void setArguments(Object[] arguments) {
+        this.arguments = arguments;
+    }
 
     public boolean valueOverriden(){
 

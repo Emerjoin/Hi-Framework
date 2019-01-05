@@ -109,7 +109,7 @@ public class MVCReqHandler extends ReqHandler{
 
     private Logger log;
 
-    private Map getValues(HttpServletRequest request){
+    private Map<String,Object> getValues(HttpServletRequest request){
 
         Map<String,Object> finalValues = new HashMap<String, Object>();
         Map<String,String[]> map =  request.getParameterMap();
@@ -194,10 +194,16 @@ public class MVCReqHandler extends ReqHandler{
 
         }
 
+        Map<String,Object> arguments = null;
+
         ControllerRequestEvent call = new ControllerRequestEvent();
         call.setMethod(actionMethod);
         call.setClazz(controller);
         call.setBefore();
+        if(withParams) {
+            arguments = getValues(requestContext.getRequest());
+            call.setArguments(arguments);
+        }
 
         //Before action Event
         controllerRequestEvent.fire(call);
@@ -206,7 +212,7 @@ public class MVCReqHandler extends ReqHandler{
             return;
 
         if(withParams)
-            actionMethod.invoke(instance,getValues(requestContext.getRequest()));
+            actionMethod.invoke(instance,arguments);
         else
             actionMethod.invoke(instance);
 
