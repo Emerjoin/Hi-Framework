@@ -5,7 +5,7 @@ It's a light Java Framework that allows developers to write fully Ajax web appli
 # Need some guidance?
 Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-started/](https://docs.hi-framework.org/1.1.0/getting-started/index.html "Hi-Framework docs")
 
-# 1.2.1 Changes
-## Routing
-* An bug that would cause Hi-Framework to return HTTP 200 for a Request that failed to be routed.
-* More warning logs introduced on for frontiers routing to help developers identity request failure causes
+# 1.3.0 Changes
+## 	Events
+* ControllerRequestEvent - getParams() added
+* FrontierRequestEvent - getParams() added
