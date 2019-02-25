@@ -3,6 +3,7 @@ package org.emerjoin.hi.web.frontier.model;
 
 import org.emerjoin.hi.web.HiCDI;
 import org.emerjoin.hi.web.meta.Frontier;
+import org.emerjoin.hi.web.meta.Nullable;
 
 import javax.servlet.ServletException;
 import java.lang.annotation.Annotation;
@@ -58,7 +59,8 @@ public class FrontierBeansCrawler {
             for (Parameter parameter : parameters) {
                 Class paramType = paramTypes[i];
                 String paraName = parameter.getName();
-                MethodParam methodParam = new MethodParam(paraName,paramType);
+                Nullable nullable = parameter.getAnnotation(Nullable.class);
+                MethodParam methodParam = new MethodParam(paraName,paramType,nullable!=null);
                 beanMethod.addParam(methodParam);
                 i++;
 

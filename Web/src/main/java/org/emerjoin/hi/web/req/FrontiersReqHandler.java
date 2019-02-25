@@ -76,9 +76,11 @@ public class FrontiersReqHandler extends ReqHandler {
                                  HttpServletRequest request) throws FrontierCallException{
 
         Object paramValue = argsMap.get(methodParam.getName());
-        if(paramValue==null)
+        if(paramValue==null&&!methodParam.isNullable())
             throw new MissingFrontierParamException(frontier,
                     frontierMethod.getName(),methodParam.getName());
+        else if(paramValue==null)
+            return null;
 
         if(!(methodParam.getType().isInstance(paramValue))&& paramValue instanceof Map){
             String paramJson = gson.toJson(paramValue);
@@ -192,8 +194,7 @@ public class FrontiersReqHandler extends ReqHandler {
             MethodParam methodParams[] = frontierMethod.getParams();
 
             for(MethodParam methodParam : methodParams)
-                paramsMap.put(methodParam.getName(),getParamValue(frontier,frontierMethod,methodParam,uploadsMap,argsMaps,req));
-
+                paramsMap.put(methodParam.getName(), getParamValue(frontier, frontierMethod, methodParam, uploadsMap, argsMaps, req));
 
         }catch (IOException | ServletException ex){
 
@@ -213,11 +214,14 @@ public class FrontiersReqHandler extends ReqHandler {
 
         for(MethodParam methodParam : methodParams){
             JsonElement jsonElement = jsonObject.get(methodParam.getName());
-            if(jsonElement==null)
+            if(jsonElement==null&&!methodParam.isNullable())
                 throw new MissingFrontierParamException(frontier,frontierMethod.getName(),methodParam.getName());
+            else if(jsonElement==null){
+                paramsMap.put(methodParam.getName(),
+                        null);
+            }
 
             Object paramValue = null;
-
             try {
 
                 paramValue = gson.fromJson(jsonElement, methodParam.getType());
@@ -226,10 +230,10 @@ public class FrontiersReqHandler extends ReqHandler {
                 paramValue = null;
             }
 
-            if(paramValue==null)
+            if(paramValue==null&&!methodParam.isNullable())
                 throw new InvalidFrontierParamException(frontier,frontierMethod.getName(),methodParam.getName());
-
-            paramsMap.put(methodParam.getName(),paramValue);
+            paramsMap.put(methodParam.getName(),
+                    paramValue);
 
         }
 
