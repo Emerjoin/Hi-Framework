@@ -54,10 +54,12 @@ public class DispatcherServlet extends HttpServlet {
 
 
     private String getRouteURL(HttpServletRequest request){
-
         String requestURI = request.getRequestURI();
-        return request.getRequestURI().replace(request.getContextPath()+"/","");
-
+        if(request.getContextPath().isEmpty()){
+            return requestURI.substring(1, requestURI.length());
+        }
+        return request.getRequestURI().replace(request.getContextPath()+"/",
+                "");
     }
 
 
@@ -105,10 +107,21 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     public String computeRequestBaseURL(HttpServletRequest request){
-        String req = request.getRequestURL().toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append(request.getScheme());
+        builder.append(':');
+        builder.append("//");
+        builder.append(request.getServerName());
+        int serverPort = request.getServerPort();
+        if(serverPort!=80&&serverPort!=443) {
+            builder.append(':');
+            builder.append(serverPort);
+        }
         String contextPath = request.getContextPath();
-        int indexOfContext = req.indexOf(contextPath);
-        return req.substring(0,indexOfContext+contextPath.length()+1);
+        if(!contextPath.isEmpty())
+            builder.append(contextPath);
+        builder.append('/');
+        return builder.toString();
     }
 
 

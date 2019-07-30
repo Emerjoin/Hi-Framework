@@ -100,7 +100,7 @@ public class WebrootReqHandler extends ReqHandler {
     public boolean handle(RequestContext requestContext) throws ServletException, IOException {
 
         this.requestContext = requestContext;
-        String assetUrl = requestContext.getRequest().getRequestURI().replace(requestContext.getRequest().getContextPath()+"/","");
+        String assetUrl = requestContext.getRouteUrl();
         int indexAssetsSlash = assetUrl.lastIndexOf("webroot/");
         assetUrl = assetUrl.substring(indexAssetsSlash,assetUrl.length());
 

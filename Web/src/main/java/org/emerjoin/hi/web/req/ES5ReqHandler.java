@@ -276,7 +276,7 @@ public class ES5ReqHandler extends ReqHandler {
 
             this.requestContext = requestContext;
 
-            String requestURL = requestContext.getRequest().getRequestURI().replace(requestContext.getRequest().getContextPath() + "/", "");
+            String requestURL = requestContext.getRouteUrl();
             int indexOfLastSlash = requestURL.lastIndexOf('/');
 
             String templateName = (String) activeUser.getProperty(FrontEnd.TEMPLATE_SESSION_VARIABLE,

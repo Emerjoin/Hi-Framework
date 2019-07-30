@@ -189,7 +189,7 @@ public class XMLConfigProvider implements ConfigProvider {
 
         }catch (IOException ex){
 
-            throw new BadConfigException("Failed to read Hi configuration file in path /WEB-INF/hi.xml");
+            throw new BadConfigException("Failed to read Hi configuration file in path /WEB-INF/hi.xml",ex);
 
         }
 

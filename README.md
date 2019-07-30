@@ -8,6 +8,7 @@ Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-st
 # 1.4.0 Changes
 * Base URL configuration support added
 * Application Startup event introduced
+* Fixed: Bug that was preventing applications from working on Root Context
 
 ## Base URL configuration
 ### Static configuration approach 
