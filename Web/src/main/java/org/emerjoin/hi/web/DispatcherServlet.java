@@ -81,7 +81,6 @@ public class DispatcherServlet extends HttpServlet {
 
             request.getSession(true);
             String routeURL = getRouteURL(request);
-            _log.debug("Route URL: "+routeURL);
 
             routeURL = filterRouteURL(routeURL, response);
             if (routeURL == null)
