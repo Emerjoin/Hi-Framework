@@ -6,17 +6,22 @@ It's a light Java Framework that allows developers to write fully Ajax web appli
 Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-started/](https://docs.hi-framework.org/1.1.0/getting-started/index.html "Hi-Framework docs")
 
 # 1.4.0 Changes
-## Base URL configuration support added
-### Static configurations approach 
+* Base URL configuration support added
+* Application Startup event introduced
 
+## Base URL configuration
+### Static configuration approach 
+This approach makes use of the __hi.xml__ configurations file.
 ```xml
     <web>
-        <welcome-url>whatever/path</welcome-url>
+        ...
         <base-url>http://somewhere.com/</base-url>
+        ...
     </web>
 ```
 
 ### Dynamic configuration approach
+This approach lets you change the base URL from anywhere in your application.
 
 ```java
 
