@@ -49,9 +49,10 @@
     <xsd:complexType name="webType">
         <xsd:all maxOccurs="1" minOccurs="1">
             <xsd:element type="xsd:string" name="views-directory" nillable="false" minOccurs="0" maxOccurs="1"/>
-            <xsd:element type="xsd:string" name="welcome-url" nillable="false" minOccurs="0" maxOccurs="1"></xsd:element>
-            <xsd:element type="hi:templatesType" name="templates" nillable="false" minOccurs="0" maxOccurs="1"></xsd:element>
-            <xsd:element type="hi:timeoutValue" name="default-frontiers-timeout" minOccurs="0" maxOccurs="1"></xsd:element>
+            <xsd:element type="xsd:string" name="welcome-url" nillable="false" minOccurs="0" maxOccurs="1"/>
+            <xsd:element type="hi:templatesType" name="templates" nillable="false" minOccurs="0" maxOccurs="1"/>
+            <xsd:element type="hi:timeoutValue" name="default-frontiers-timeout" minOccurs="0" maxOccurs="1"/>
+            <xsd:element type="xsd:string" name="base-url" minOccurs="0"/>
         </xsd:all>
     </xsd:complexType>
 
