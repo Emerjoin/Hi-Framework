@@ -24,6 +24,7 @@ public class AppConfigurations {
     private String defaultLanguage = "default";
     private String defaultTemplate = "index";
     private long frontiersTimeout = 0;
+    private String baseUrl;
 
     private Map<String,String> testedViews = new HashMap<>();
 
@@ -182,5 +183,13 @@ public class AppConfigurations {
 
     public void setFrontiersTimeout(long frontiersTimeout) {
         this.frontiersTimeout = frontiersTimeout;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 }

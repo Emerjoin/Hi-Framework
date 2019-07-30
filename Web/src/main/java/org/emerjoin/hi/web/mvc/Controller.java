@@ -1,9 +1,6 @@
 package org.emerjoin.hi.web.mvc;
 
-import org.emerjoin.hi.web.FrontEnd;
-import org.emerjoin.hi.web.RequestContext;
-import org.emerjoin.hi.web.Helper;
-import org.emerjoin.hi.web.View;
+import org.emerjoin.hi.web.*;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.events.TemplateLoadEvent;
 import org.emerjoin.hi.web.events.TemplateTransformEvent;
@@ -134,7 +131,6 @@ public class Controller {
         AppConfigurations config = AppConfigurations.get();
         RequestContext requestContext = CDI.current().select(RequestContext.class).get();
 
-
         String actionName = requestContext.getData().get("actionU").toString();
         String controllerName = requestContext.getData().get("controllerU").toString();
         String presentationHtmlFile = actionName.toString();
@@ -153,12 +149,10 @@ public class Controller {
         FrontEnd frontEnd = CDI.current().select(FrontEnd.class).get();
         TemplateLoadEvent event = null;
 
-
         if(!requestContext.hasAjaxHeader()){
             event = new TemplateLoadEvent();
             templateLoadEvent.fire(event);
         }
-
 
         if(values==null)
             values = new HashMap<>();
@@ -187,6 +181,8 @@ public class Controller {
                 viewTransformEventEvent);
 
     }
+
+
 
 
 }

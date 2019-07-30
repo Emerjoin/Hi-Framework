@@ -42,6 +42,8 @@ public class AppContext implements Serializable {
     @Inject
     private Event<GsonInitEvent> gsonInitEvent;
 
+    private String baseUrl;
+
     public String getAssetVersionToken(){
 
        return  assetVersionPrefix+String.valueOf(getDeployId());
@@ -105,5 +107,18 @@ public class AppContext implements Serializable {
 
     }
 
+    public String getBaseURL() {
+        return baseUrl;
+    }
+
+    public void setBaseURL(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    public boolean isBaseURLSet(){
+
+        return this.baseUrl!=null;
+
+    }
 
 }

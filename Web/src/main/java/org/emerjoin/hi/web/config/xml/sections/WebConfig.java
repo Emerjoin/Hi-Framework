@@ -82,6 +82,12 @@ public class WebConfig implements Configurator {
             configs.setWelcomeUrl(wecomeUrl);
         }
 
+        NodeList baseUrlNodes = webElement.getElementsByTagName("base-url");
+        if(baseUrlNodes.getLength()>0){
+            org.w3c.dom.Element baseUrlElement =(org.w3c.dom.Element) baseUrlNodes.item(0);
+            String baseUrl = baseUrlElement.getTextContent();
+            configs.setBaseUrl(baseUrl);
+        }
 
        templates(webElement,configs);
        deploymentAndLang(docElement,configs);

@@ -4,6 +4,7 @@ import org.emerjoin.hi.web.AppContext;
 import org.emerjoin.hi.web.BootstrapUtils;
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.ConfigProvider;
+import org.emerjoin.hi.web.events.ApplicationStartupEvent;
 import org.emerjoin.hi.web.events.TemplateLoadEvent;
 import org.emerjoin.hi.web.i18n.I18nXmlConfig;
 import org.emerjoin.hi.web.exceptions.HiException;
@@ -20,12 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -51,6 +52,9 @@ public class BootAgent {
 
     @Inject
     private ServletContext context;
+
+    @Inject
+    private Event<ApplicationStartupEvent> startupEvent;
 
     private Optional<I18nConfiguration> i18nConfiguration;
 
@@ -200,11 +204,30 @@ public class BootAgent {
         findTestedActions(); //Find all the tested controllers actions
         scriptLibrary.init(servletContext);//Load scripts and generate frontiers
         router.init(servletContext,servletConfig); //Register requests handlers
+        applyBaseUrl(appContext);
         initBootExtensions(); //Load and execute boot extensions
-
+        fireStartupEvent(appContext);
 
     }
 
+
+    private void fireStartupEvent(AppContext context){
+
+        this.startupEvent.fire(new ApplicationStartupEvent(
+                context));
+
+    }
+
+    private void applyBaseUrl(AppContext context){
+
+        AppConfigurations configurations = AppConfigurations.get();
+        if(configurations.getBaseUrl()!=null){
+            String baseURL = configurations.getBaseUrl();
+            _log.info("Configured Base URL: "+baseURL);
+            context.setBaseURL(baseURL);
+        }
+
+    }
 
     private void initI18n(){
 

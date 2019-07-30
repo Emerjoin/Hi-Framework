@@ -183,9 +183,9 @@ public class HTMLizer {
         Gson gson = AppContext.createGson();
 
         Map map = new HashMap();
-        map.put("base_url", requestContext.getBaseURL());
-        map.put("base64_url", new BASE64Encoder().encode(requestContext.getBaseURL().getBytes()));
-        map.put("simple_base_url", requestContext.getBaseURL().replace(http,"").replace(https,""));
+        map.put("base_url", appContext.getBaseURL());
+        map.put("base64_url", new BASE64Encoder().encode(appContext.getBaseURL().getBytes()));
+        map.put("simple_base_url", appContext.getBaseURL().replace(http,"").replace(https,""));
         map.put("deployId",appContext.getDeployId());
         map.put("deployMode",appContext.getDeployMode().toString());
         map.put("csrfToken",activeUser.getCsrfToken());

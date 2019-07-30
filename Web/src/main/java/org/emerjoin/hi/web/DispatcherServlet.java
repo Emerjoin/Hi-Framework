@@ -55,6 +55,7 @@ public class DispatcherServlet extends HttpServlet {
 
     private String getRouteURL(HttpServletRequest request){
 
+        String requestURI = request.getRequestURI();
         return request.getRequestURI().replace(request.getContextPath()+"/","");
 
     }
@@ -68,8 +69,17 @@ public class DispatcherServlet extends HttpServlet {
 
             tic();
 
-            HttpSession session = request.getSession(true);
+            AppContext appContext = CDI.current().select(AppContext.class).get();
+            if(!appContext.isBaseURLSet()) {
+                //Automatically set base URL
+                String computedBaseUrl = computeRequestBaseURL(request);
+                _log.info("Computed base URL: "+computedBaseUrl);
+                appContext.setBaseURL(computedBaseUrl);
+            }
+
+            request.getSession(true);
             String routeURL = getRouteURL(request);
+            _log.debug("Route URL: "+routeURL);
 
             routeURL = filterRouteURL(routeURL, response);
             if (routeURL == null)
@@ -88,10 +98,17 @@ public class DispatcherServlet extends HttpServlet {
 
         }finally {
 
-            _log.debug(String.format("(%d) @ %s  => took %f millisecs ",status,request.getRequestURI(),toc()));
+            _log.debug(String.format("[%d] %s  => took %f millisecs",status,request.getRequestURI(),toc()));
 
         }
 
+    }
+
+    public String computeRequestBaseURL(HttpServletRequest request){
+        String req = request.getRequestURL().toString();
+        String contextPath = request.getContextPath();
+        int indexOfContext = req.indexOf(contextPath);
+        return req.substring(0,indexOfContext+contextPath.length()+1);
     }
 
 

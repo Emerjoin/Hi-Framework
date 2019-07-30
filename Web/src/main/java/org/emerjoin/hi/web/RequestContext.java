@@ -2,6 +2,7 @@ package org.emerjoin.hi.web;
 
 
 
+import org.emerjoin.hi.web.config.AppConfigurations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,9 @@ import java.util.Map;
 public class RequestContext {
 
     public static String AJAX_HEADER_KEY = "AJAX_MVC";
+
+    @Inject
+    private AppContext appContext;
 
     @Inject
     private HttpServletRequest request = null;
@@ -78,15 +82,6 @@ public class RequestContext {
 
     }
 
-    public String getBaseURL(){
-
-        String req =this.getRequest().getRequestURL().toString();
-        String contextPath = this.getRequest().getContextPath();
-        int indexOfContext = req.indexOf(contextPath);
-        String baseUrl = req.substring(0,indexOfContext+contextPath.length()+1);
-        return baseUrl;
-
-    }
 
     public String getUsername(){
 
