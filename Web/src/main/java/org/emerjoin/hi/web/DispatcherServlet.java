@@ -37,19 +37,18 @@ public class DispatcherServlet extends HttpServlet {
     @Inject
     private ConfigProvider configProvider;
 
-    private String filterRouteURL(String routeURL,HttpServletResponse response) throws IOException {
-
+    private String filterRouteURL(RequestContext requestContext,HttpServletResponse response) throws IOException {
+        String routeURL = requestContext.getRouteUrl();
         if(routeURL.trim().length()==0){
 
             if(AppConfigurations.get().getWelcomeUrl()!=null) {
-                response.sendRedirect(AppConfigurations.get().getWelcomeUrl());
+                requestContext.sendRedirect(AppConfigurations.get().getWelcomeUrl());
                 return null;
             }
 
         }
 
         return routeURL;
-
     }
 
 
@@ -82,14 +81,13 @@ public class DispatcherServlet extends HttpServlet {
             request.getSession(true);
             String routeURL = getRouteURL(request);
 
-            routeURL = filterRouteURL(routeURL, response);
-            if (routeURL == null)
-                return;
-
             RequestContext requestContext = CDI.current().select(RequestContext.class).get();
             requestContext.setRouteUrl(routeURL);
             requestContext.setResponse(response);
-
+            routeURL = filterRouteURL(requestContext,response);
+            if (routeURL == null)
+                return;
+            requestContext.setRouteUrl(routeURL);
             status = router.doRoute(requestContext, routeURL, isPost);
 
         }catch (ServletException | IOException ex){
