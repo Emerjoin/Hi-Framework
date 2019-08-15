@@ -163,6 +163,7 @@ public class RequestContext {
             return;
         }
         String path = appContext.getBaseURL() + route;
+        log.debug("HTTP 302: "+path);
         getResponse().sendRedirect(path);
     }
 
