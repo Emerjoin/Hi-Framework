@@ -1,10 +1,12 @@
 package org.emerjoin.hi.web;
 
+import org.emerjoin.hi.web.internal.JSCommandSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +32,7 @@ public class RequestContext {
     private HttpServletResponse response = null;
 
     @Inject
-    private FrontEnd frontEnd;
+    private Event<JSCommandSchedule> jsCommandScheduleEvent;
 
     @Inject
     private ServletContext servletContext = null;
@@ -159,12 +161,21 @@ public class RequestContext {
 
     public void sendRedirect(String route) throws IOException{
         if(hasAjaxHeader()){
-            frontEnd.ajaxRedirect(routeUrl);
+            log.debug("Ajax Redirect: "+route);
+            this.ajaxRedirect(routeUrl);
             return;
         }
         String path = appContext.getBaseURL() + route;
-        log.debug("HTTP 302: "+path);
+        log.debug("HTTP Redirect: "+path);
         getResponse().sendRedirect(path);
+    }
+
+    private void ajaxRedirect(String url){
+        JSCommandSchedule redirectCommand = new JSCommandSchedule(FrontEnd.
+                COMMAND_REDIRECT);
+        redirectCommand.getParameters().put(FrontEnd.COMMAND_URL_PARAM, url);
+        jsCommandScheduleEvent.fire(
+                redirectCommand);
     }
 
 }

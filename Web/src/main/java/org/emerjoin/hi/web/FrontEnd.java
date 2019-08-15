@@ -2,11 +2,13 @@ package org.emerjoin.hi.web;
 
 import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.i18n.I18nRuntime;
+import org.emerjoin.hi.web.internal.JSCommandSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URL;
@@ -21,6 +23,10 @@ public class FrontEnd {
 
     public static String TEMPLATE_SESSION_VARIABLE ="$template_";
     public static String LANGUAGE_SESSION_VARIABLE="$language_";
+    public static final String COMMAND_RELOAD = "reload";
+    public static final String COMMAND_RELOAD_LANGUAGE = "reloadLanguage";
+    public static final String COMMAND_REDIRECT = "redirect";
+    public static final String COMMAND_URL_PARAM = "url";
 
     private Map<String,Map> laterInvocations = new HashMap<>();
 
@@ -29,6 +35,12 @@ public class FrontEnd {
 
     @Inject
     private ActiveUser activeUser;
+
+    @Inject
+    private RequestContext requestContext;
+
+    @Inject
+    private AppContext appContext;
 
     private String template;
     private String language;
@@ -65,29 +77,38 @@ public class FrontEnd {
 
     public void refresh(){
 
-        invokeAfter("reload", Collections.emptyMap());
+        invokeAfter(COMMAND_RELOAD, Collections.emptyMap());
 
     }
 
     public void refresh(String url){
 
         Map<String,Object> map = new HashMap<>();
-        map.put("url",url);
-        invokeAfter("reload", map);
+        map.put(COMMAND_URL_PARAM,url);
+        invokeAfter(COMMAND_RELOAD, map);
 
     }
 
-    public void invokeAfter(String actionName, Map params) {
+
+    public void submit(@Observes JSCommandSchedule jsCommandSchedule){
+
+        this.invokeAfter(jsCommandSchedule.getName(),
+                jsCommandSchedule.getParameters());
+
+    }
+
+    public void invokeAfter(String actionName, Map<String,Object> params) {
 
         laterInvocations.put("$"+actionName,params);
 
     }
 
+    @Deprecated
     public void ajaxRedirect(String url){
 
         Map map = new HashMap<>();
-        map.put("url",url);
-        invokeAfter("redirect",map);
+        map.put(COMMAND_URL_PARAM,url);
+        invokeAfter(COMMAND_REDIRECT,map);
 
     }
 
@@ -110,7 +131,7 @@ public class FrontEnd {
         activeUser.setProperty(LANGUAGE_SESSION_VARIABLE,this.language);
         //Set reloadLanguage command if this method is invoked on an ajax request
         if(isRequestAjax()||isFrontierRequest())
-            invokeAfter("reloadLanguage", Collections.emptyMap());
+            invokeAfter(COMMAND_RELOAD_LANGUAGE, Collections.emptyMap());
         else {
 
             if(I18nRuntime.isReady()){
@@ -121,21 +142,28 @@ public class FrontEnd {
     }
 
     public void setTemplate(String template) {
-
         String currentTemplate = activeUser.getProperty(TEMPLATE_SESSION_VARIABLE).toString();
-
         if(template.equals(currentTemplate)) {
-            log.warn(String.format("Trying to set the same template name : %s",template));
             return;
         }
 
-        log.debug(String.format("Changing template %s => %s",currentTemplate,template));
+        log.debug(String.format("Template change [%s] => [%s]",currentTemplate,template));
         this.template = template;
         activeUser.setProperty(TEMPLATE_SESSION_VARIABLE,this.template);
-
+        
         //Reload command if this method is invoked on an ajax request
-        if(isRequestAjax()||isFrontierRequest())
-            refresh(httpServletRequest.getRequestURI());
+        if(isRequestAjax()||isFrontierRequest()){
+            StringBuilder url = new StringBuilder();
+            url.append(appContext.getBaseURL());
+            url.append(requestContext.getUrl());
+            String qs = httpServletRequest.getQueryString();
+            if(qs!=null && !qs.isEmpty()){
+                url.append("?");
+                url.append(httpServletRequest.getQueryString());
+            }
+            log.debug("Ajax Reload: "+url.toString());
+            refresh(url.toString());
+        }
 
 
     }
