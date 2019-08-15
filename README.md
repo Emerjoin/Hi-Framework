@@ -5,52 +5,26 @@ It's a light Java Framework that allows developers to write fully Ajax web appli
 # Need some guidance?
 Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-started/](https://docs.hi-framework.org/1.1.0/getting-started/index.html "Hi-Framework docs")
 
-# 1.4.0 Changes
-* Base URL configuration support added
-* Application Startup event introduced
-* Fixed: Bug that was preventing applications from working on Root Context
+# 1.5.0 Changes
+* Redirect API Introduced
 
-## Base URL configuration
-### Static configuration approach 
-This approach makes use of the __hi.xml__ configurations file.
-```xml
-    <web>
-        ...
-        <base-url>http://somewhere.com/</base-url>
-        ...
-    </web>
-```
-
-### Dynamic configuration approach
-This approach lets you change the base URL from anywhere in your application.
-
+## Redirect API Usage example
+See the code snippet below:
 ```java
 
     ...
     
     @Inject
-    AppContext context;
+    RequestContext context;
 
 
     public void whatever(){
         
-        context.setBaseURL("http://somethingelse.com");
+        context.sendRedirect("people/list");
         
     }
     
     ...
 
 ```
-
-## Startup Event
-This event allows to perform some application specific initializations, including defining the Base URL:
-
-```java
-    
-    public void startup(@Observes ApplicationStartupEvent event){
-   
-        //TODO: Initialize your app here
-   
-    }
-
-```
+The API will perform the redirect regardless of being invoked in the middle of an AJAX Request.

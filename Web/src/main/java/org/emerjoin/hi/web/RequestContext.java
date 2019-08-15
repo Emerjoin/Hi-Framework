@@ -1,8 +1,5 @@
 package org.emerjoin.hi.web;
 
-
-
-import org.emerjoin.hi.web.config.AppConfigurations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +9,7 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -30,6 +28,9 @@ public class RequestContext {
     @Inject
     private HttpServletRequest request = null;
     private HttpServletResponse response = null;
+
+    @Inject
+    private FrontEnd frontEnd;
 
     @Inject
     private ServletContext servletContext = null;
@@ -154,6 +155,15 @@ public class RequestContext {
 
         return data;
 
+    }
+
+    public void sendRedirect(String route) throws IOException{
+        if(hasAjaxHeader()){
+            frontEnd.ajaxRedirect(routeUrl);
+            return;
+        }
+        String path = appContext.getBaseURL() + route;
+        getResponse().sendRedirect(path);
     }
 
 }
