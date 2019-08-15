@@ -155,7 +155,7 @@ public class FrontEnd {
         if(isRequestAjax()||isFrontierRequest()){
             StringBuilder url = new StringBuilder();
             url.append(appContext.getBaseURL());
-            url.append(requestContext.getUrl());
+            url.append(requestContext.getRouteUrl());
             String qs = httpServletRequest.getQueryString();
             if(qs!=null && !qs.isEmpty()){
                 url.append("?");
