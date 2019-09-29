@@ -2383,7 +2383,6 @@ Hi.$frontiers.Promise = function(){
 
     var request = undefined;
 
-
     var getGlobalHandler = function(name){
 
         if(__.hasOwnProperty("$frontiers")) {
@@ -2490,6 +2489,21 @@ Hi.$frontiers.Promise = function(){
 
             gErrorHandler.call(getGlobalHandlers(),this,408);
 
+        }
+
+        this._setRequestFinished();
+
+    };
+
+    this._setExpired = function(){
+
+        var gExpiredHandler = getGlobalHandler("expired");
+        var gErrorHandler = getGlobalHandler("catch");
+
+        if(typeof gExpiredHandler=="function"){
+            gExpiredHandler.call(getGlobalHandlers(),this);
+        }else if(typeof gErrorHandler=="function"){
+            gErrorHandler.call(getGlobalHandlers(),419);
         }
 
         this._setRequestFinished();
@@ -3050,6 +3064,9 @@ var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fa
                     case 408:
                         promisse._setTimedOut();
                         break;
+                    case 419:
+                        promisse._setExpired();
+                        break;
                     case 421:
                         promisse._setInterrupted();
                         break;
@@ -3070,7 +3087,7 @@ var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fa
 
     ajaxParams.method = "POST";
     ajaxParams.url = $functionUrl;
-    ajaxParams.headers = {csrfToken: App.csrfToken};
+    //ajaxParams.headers = {csrfToken: App.csrfToken};
     ajaxParams.dataType = "json";
     ajaxParams.cache = false;
     ajaxParams.timeout = _$tout;

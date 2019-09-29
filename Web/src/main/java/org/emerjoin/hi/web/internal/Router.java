@@ -92,18 +92,19 @@ public class Router {
         boolean handled = false;
         if(wasPreviouslyMatched(routeURL)){
             ReqHandler reqHandler = ReqHandler.getHandler(getPreviouslyMatchedHandler(routeURL));
+            int status = 200;
             try {
                 if (!reqHandler.handle(requestContext)) {
                     requestContext.getResponse().sendError(404);
                     return 404;
-                }
+                } else status = requestContext.getResponse().getStatus();
             }catch (ServletException ex){
                 throw ex;
 
             }catch (Throwable ex){
                 throw new ServletException(ex);
             }
-            return 200;
+            return status;
         }
 
 

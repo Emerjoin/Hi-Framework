@@ -118,14 +118,14 @@ public class I18nStarter {
 
         I18nMappingsInfo i18nMappingsInfo = new I18nMappingsInfo();
 
-        XMLEasy xmlEasy = new XMLEasy(mappingsXML).validate(MAPPINGS_XSD).freeze();
+        XMLEasy xmlEasy = new XMLEasy(mappingsXML).validate(MAPPINGS_XSD);
         xmlEasy.ifChild(TEMPLATES_MAPPINGS_TAG).then(templates -> {
             LOG.info("Loading templates i18n mappings...");
             //Load templates mappings
             templates.streamChildren().forEach((template -> {
                 String templateName = template.getAttribute("for");
                 LOG.info(String.format("Loading I18n mappings for [%s]",templateName));
-                XMLEasy xml = XMLEasy.easy(template);
+                XMLEasy xml = XMLEasy.it(template);
                 getMappedDictionaries(xml.streamChildren(),lang)
                         .forEach(url -> i18nMappingsInfo.addTemplateMapping(templateName,url));
 
@@ -138,7 +138,7 @@ public class I18nStarter {
             views.streamChildren().forEach(view -> {
                 String path = view.getAttribute("for");
                 LOG.info(String.format("Loading I18n mappings for [%s]",path));
-                XMLEasy xml = XMLEasy.easy(view);
+                XMLEasy xml = XMLEasy.it(view);
                 getMappedDictionaries(xml.streamChildren(),lang)
                         .forEach(url -> i18nMappingsInfo.addViewMapping("/"+path,url));
 

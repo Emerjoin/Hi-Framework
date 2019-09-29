@@ -188,7 +188,6 @@ public class HTMLizer {
         map.put("simple_base_url", appContext.getBaseURL().replace(http,"").replace(https,""));
         map.put("deployId",appContext.getDeployId());
         map.put("deployMode",appContext.getDeployMode().toString());
-        map.put("csrfToken",activeUser.getCsrfToken());
 
         return gson.toJson(map);
 

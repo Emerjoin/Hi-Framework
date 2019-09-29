@@ -81,7 +81,7 @@ public class BootAgent {
 
             }catch (Exception ex){
 
-                throw new HiException("Failed to initialize boot extension : "+extension.getClass().getCanonicalName(),ex);
+                throw new HiException("Failed to init boot extension : "+extension.getClass().getCanonicalName(),ex);
 
             }
 

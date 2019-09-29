@@ -1,4 +1,4 @@
-package org.emerjoin.hi.web.uti;
+package org.emerjoin.hi.web.util;
 
 /**
  * @author Mário Júnior

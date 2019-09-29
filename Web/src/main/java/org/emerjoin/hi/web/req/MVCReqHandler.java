@@ -315,6 +315,12 @@ public class MVCReqHandler extends ReqHandler{
 
     }
 
+    private void renewCsrfToken(){
+
+
+
+    }
+
 
 
 

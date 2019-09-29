@@ -27,14 +27,11 @@ public class AppConfigurations {
     private String baseUrl;
 
     private Map<String,String> testedViews = new HashMap<>();
-
     private List<String> smartCachingExtensions = new ArrayList<>();
-
     private DeploymentMode deploymentMode = DeploymentMode.DEVELOPMENT;
-
+    private Frontiers frontiersConfig = new Frontiers();
+    private Security securityConfig = new Security();
     private Logger _log = LoggerFactory.getLogger(AppConfigurations.class);
-
-
 
     public static enum DeploymentMode {
 
@@ -191,5 +188,21 @@ public class AppConfigurations {
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
+    }
+
+    public Frontiers getFrontiersConfig() {
+        return frontiersConfig;
+    }
+
+    public void setFrontiersConfig(Frontiers frontiersConfig) {
+        this.frontiersConfig = frontiersConfig;
+    }
+
+    public Security getSecurityConfig() {
+        return securityConfig;
+    }
+
+    public void setSecurityConfig(Security securityConfig) {
+        this.securityConfig = securityConfig;
     }
 }

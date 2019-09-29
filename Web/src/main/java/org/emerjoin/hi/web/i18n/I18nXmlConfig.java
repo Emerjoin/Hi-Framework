@@ -31,13 +31,13 @@ public class I18nXmlConfig implements Configurator {
 
     @Override
     public void doConfig(AppConfigurations configs, Map<String, Element> elements, Element document) throws BadConfigException {
-        XMLEasy i18nXml = new XMLEasy(document).child("i18n").freeze();
+        XMLEasy i18nXml = new XMLEasy(document).child("i18n");
         I18nConfiguration configuration = new I18nConfiguration();
 
         List<String> languages = new ArrayList<>();
         i18nXml.child("languages").streamChildren()
                 .forEach(element -> {
-                    XMLEasy easy = XMLEasy.easy(element);
+                    XMLEasy easy = XMLEasy.it(element);
                     String languageName = element.getTextContent();
                     languages.add(languageName);
                     Optional<String> defaultLang = easy.optionalAttribute("default");

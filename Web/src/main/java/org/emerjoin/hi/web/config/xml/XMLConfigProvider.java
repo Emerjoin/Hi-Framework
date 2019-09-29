@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -51,7 +52,7 @@ public class XMLConfigProvider implements ConfigProvider {
 
         }catch (Exception ex){
 
-            throw new BadConfiguratorException("Failed to initialize the configurator "+clazz.getCanonicalName(),ex);
+            throw new BadConfiguratorException("Failed to init the configurator "+clazz.getCanonicalName(),ex);
 
         }
 
@@ -94,7 +95,6 @@ public class XMLConfigProvider implements ConfigProvider {
     }
 
     public void load(ServletContext servletContext, ServletConfig config, Set<Index> indexSet) throws HiException{
-
         Set<Class<?>> configurators  = getConfigurators(indexSet);
         Document document = loadDocument(servletContext);
         Element docElement = document.getDocumentElement();
@@ -108,15 +108,18 @@ public class XMLConfigProvider implements ConfigProvider {
             ConfigSection section = (ConfigSection) clazz.getDeclaredAnnotation(ConfigSection.class);
 
             HashMap<String,Element> elements = new HashMap<>();
-
             for(String tag: section.tags()){
-
-                NodeList nodeList = docElement.getElementsByTagName(tag);
-                if(nodeList.getLength()==0)
-                    continue;
-
-                elements.put(tag,(Element) nodeList.item(0));
-
+                NodeList childNodes = docElement.getChildNodes();
+                for(int i=0; i<childNodes.getLength();i++){
+                    Node node = childNodes.item(i);
+                    if(node instanceof Element){
+                        Element element = (Element) node;
+                        if(element.getTagName().equals(tag)){
+                            elements.put(tag,element);
+                            break;
+                        }
+                    }
+                }
             }
 
             if(elements.size()==0) {
@@ -124,12 +127,9 @@ public class XMLConfigProvider implements ConfigProvider {
                 continue;
             }
 
-
             _log.info("Loading configurator " + clazz.getCanonicalName() + "...");
             configurator.doConfig(AppConfigurations.get(),elements,docElement);
-
         }
-
     }
 
 

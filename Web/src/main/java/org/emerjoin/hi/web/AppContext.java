@@ -44,6 +44,10 @@ public class AppContext implements Serializable {
 
     private String baseUrl;
 
+    private String origin;
+
+    private String domain;
+
     public String getAssetVersionToken(){
 
        return  assetVersionPrefix+String.valueOf(getDeployId());
@@ -113,12 +117,41 @@ public class AppContext implements Serializable {
 
     public void setBaseURL(String baseUrl) {
         this.baseUrl = baseUrl;
+        this.computeOrigin();
+        this.computeDomain();
     }
 
     public boolean isBaseURLSet(){
-
         return this.baseUrl!=null;
+    }
 
+    public String getOrigin() {
+        return this.origin;
+    }
+
+    public String getDomain() {
+        return this.domain;
+    }
+
+    private void computeDomain(){
+        int doubleSlashIndex = origin.indexOf("//");
+        String withoutDoubleSlash = origin.substring(doubleSlashIndex+2,origin.length());
+        int semiColonIndex = withoutDoubleSlash.indexOf(':');
+        if(semiColonIndex != -1){
+            domain = withoutDoubleSlash.substring(0,semiColonIndex);
+        }else domain = withoutDoubleSlash;
+    }
+
+    private void computeOrigin(){
+        StringBuilder builder = new StringBuilder();
+        builder.append(this.baseUrl.substring(0,baseUrl.indexOf("//")+2));
+        int doubleSlashIndex = this.baseUrl.indexOf("//");
+        String withoutDoubleSlash = this.baseUrl.substring(doubleSlashIndex+2,this.baseUrl.length());
+        int nextForwardSlashIndex = withoutDoubleSlash.indexOf('/');
+        if(nextForwardSlashIndex != -1)
+            builder.append(withoutDoubleSlash.substring(0,nextForwardSlashIndex));
+        else builder.append(withoutDoubleSlash);
+        this.origin = builder.toString();
     }
 
 }

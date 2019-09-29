@@ -2,6 +2,8 @@ package org.emerjoin.hi.web.mvc;
 
 import org.emerjoin.hi.web.*;
 import org.emerjoin.hi.web.config.AppConfigurations;
+import org.emerjoin.hi.web.config.Frontiers;
+import org.emerjoin.hi.web.config.Security;
 import org.emerjoin.hi.web.events.TemplateLoadEvent;
 import org.emerjoin.hi.web.events.TemplateTransformEvent;
 import org.emerjoin.hi.web.events.ViewTransformEvent;
@@ -16,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
@@ -44,6 +48,12 @@ public class Controller {
 
     @Inject
     private I18nContext i18nContext;
+
+    @Inject
+    private AppContext appContext;
+
+    @Inject
+    private ActiveUser activeUser;
 
     private static Logger _log = LoggerFactory.getLogger(Controller.class);
 
@@ -150,6 +160,7 @@ public class Controller {
         TemplateLoadEvent event = null;
 
         if(!requestContext.hasAjaxHeader()){
+            this.emitSecurityHeaders(requestContext);
             event = new TemplateLoadEvent();
             templateLoadEvent.fire(event);
         }
@@ -182,7 +193,46 @@ public class Controller {
 
     }
 
+    private void emitSecurityHeaders(RequestContext context){
+        this.emitCSRFHeaders(context);
+        this.emitCSPHeaders(context);
+    }
 
+    private void emitCSRFHeaders(RequestContext context){
+        Frontiers frontiersConfig = AppConfigurations.get().getFrontiersConfig();
+        Frontiers.Security.CrossSiteRequestForgery crossSiteRequestForgery = frontiersConfig
+                .getSecurity()
+                .getCrossSiteRequestForgery();
+        Frontiers.Security.CrossSiteRequestForgery.Cookie cookieConfig = crossSiteRequestForgery
+                .getCookie();
+        HttpServletResponse response = context.getResponse();
+        String token = activeUser.expireCsrfToken();
+        Cookie cookie = new Cookie(Frontiers.Security.CrossSiteRequestForgery.Cookie.NAME,token);
+        cookie.setHttpOnly(cookieConfig.isHttpOnly());
+        cookie.setSecure(cookieConfig.isSecure());
+        cookie.setPath(getCookiePath());
+        cookie.setDomain(appContext.getDomain());
+        response.addCookie(cookie);
+    }
 
+    private String getCookiePath(){
+        String baseUrl = appContext.getBaseURL();
+        String originUrl = appContext.getOrigin();
+        String path = baseUrl.substring(originUrl.length(),baseUrl.length());
+        return path;
+    }
+
+    private void emitCSPHeaders(RequestContext context){
+        Security securityConfig = AppConfigurations.get().getSecurityConfig();
+        Security.ContentSecurityPolicy contentSecurityPolicy = securityConfig.getContentPolicy();
+        HttpServletResponse response = context.getResponse();
+        if(contentSecurityPolicy.isDenyIframeEmbeding())
+            response.setHeader("X-Frame-Options","deny");
+        String policyStr = contentSecurityPolicy.toString();
+        if(!policyStr.isEmpty()) {
+            _log.debug("Content-Security-Policy: " + policyStr);
+            response.setHeader("Content-Security-Policy", policyStr);
+    }
+    }
 
 }

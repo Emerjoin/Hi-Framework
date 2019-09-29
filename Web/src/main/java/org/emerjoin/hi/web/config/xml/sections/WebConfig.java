@@ -62,10 +62,9 @@ public class WebConfig implements Configurator {
 
     @Override
     public void doConfig(AppConfigurations configs, Map<String, org.w3c.dom.Element> elements, org.w3c.dom.Element docElement) throws BadConfigException {
-
         //Template and MVC Configurations
         org.w3c.dom.Element webElement = (org.w3c.dom.Element) docElement.getElementsByTagName("web").item(0);
-        XMLEasy.easy(webElement).ifChild(FRONTIERS_TIMEOUT_ELEMENT)
+        XMLEasy.it(webElement).ifChild(FRONTIERS_TIMEOUT_ELEMENT)
                 .then((el) -> configs.setFrontiersTimeout(Long.parseLong(el.getContent()))).eval();
 
         NodeList viewsDirectoryNodes = webElement.getElementsByTagName("views-directory");
@@ -91,10 +90,7 @@ public class WebConfig implements Configurator {
 
        templates(webElement,configs);
        deploymentAndLang(docElement,configs);
-
     }
-
-
 
 
 

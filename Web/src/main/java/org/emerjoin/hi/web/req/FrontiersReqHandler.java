@@ -5,7 +5,10 @@ import org.emerjoin.hi.web.ActiveUser;
 import org.emerjoin.hi.web.AppContext;
 import org.emerjoin.hi.web.FrontEnd;
 import org.emerjoin.hi.web.RequestContext;
+import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.ConfigProvider;
+import org.emerjoin.hi.web.config.Frontiers;
+import org.emerjoin.hi.web.events.CSRFAttackAttemptEvent;
 import org.emerjoin.hi.web.events.FrontierRequestEvent;
 import org.emerjoin.hi.web.frontier.FileUpload;
 import org.emerjoin.hi.web.frontier.FrontierInvoker;
@@ -17,6 +20,7 @@ import org.emerjoin.hi.web.frontier.model.FrontierClass;
 import org.emerjoin.hi.web.frontier.model.FrontierMethod;
 import org.emerjoin.hi.web.frontier.model.MethodParam;
 import org.emerjoin.hi.web.mvc.HTMLizer;
+import org.emerjoin.hi.web.security.CsrfTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +30,9 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -39,6 +45,7 @@ import java.util.*;
 public class FrontiersReqHandler extends ReqHandler {
 
     private static Map<String,FrontierClass> frontiersMap = new HashMap();
+    private static final Logger LOGGER = LoggerFactory.getLogger(FrontiersReqHandler.class);
 
     public static void addFrontier(FrontierClass frontierClass){
         frontiersMap.put(frontierClass.getSimpleName(),frontierClass);
@@ -60,16 +67,23 @@ public class FrontiersReqHandler extends ReqHandler {
     private ServletContext servletContext;
     @Inject
     private RequestContext requestContext;
+
     @Inject
     private ActiveUser activeUser;
+
     @Inject
     private Event<FrontierRequestEvent> frontierRequestEvent;
+
+    @Inject
+    private Event<CSRFAttackAttemptEvent> csrfAttackAttemptEventEvent;
+
     @Inject
     private ConfigProvider configProvider;
     private Logger log = null;
     private Gson gson = null;
 
     private Base64.Decoder decoder = Base64.getDecoder();
+    private CsrfTokenUtil csrfTokenUtil = new CsrfTokenUtil();
 
     private Object getParamValue(String frontier,FrontierMethod frontierMethod, MethodParam methodParam,
                                  Map<String,Object> uploadsMap,Map<String,Object> argsMap,
@@ -383,21 +397,48 @@ public class FrontiersReqHandler extends ReqHandler {
 
     }
 
-    private boolean isAuthenticRequest(RequestContext requestContext){
-
-        String token = requestContext.getRequest().getHeader("csrfToken");
-        if(token==null) {
-            log.warn("CSRF Token Header missing on Request");
-            return false;
+    private Optional<Cookie> getCSRFCookie(HttpServletRequest request){
+        String cookieName = Frontiers.Security.CrossSiteRequestForgery.Cookie.NAME;
+        for(Cookie cookie: request.getCookies()){
+            if(cookie.getName().equals(cookieName))
+            return Optional.of(cookie);
         }
+        LOGGER.warn("Cookie not present: "+cookieName);
+        return Optional.empty();
+    }
 
-        if(!token.equals(activeUser.getCsrfToken())){
-            log.warn("Invalid Request CSRF Token");
-            return false;
+    private FrontierSecurityChecklist checkRequest(RequestContext requestContext){
+        FrontierSecurityChecklist checklist = new FrontierSecurityChecklist();
+        String requestOrigin = requestContext.getRequest().getHeader("Origin");
+        if(requestOrigin!=null&&!requestOrigin.equals(appContext.getOrigin())){
+            LOGGER.warn("CSRF Attack attempt detected. Not a valid origin: "+requestOrigin);
+            csrfAttackAttemptEventEvent.fire(new CSRFAttackAttemptEvent());
+            return checklist;
         }
-
-        return true;
-
+        checklist.setOriginCheck(true);
+        Optional<Cookie> csrfCookie = getCSRFCookie(requestContext.getRequest());
+        if(!csrfCookie.isPresent()){
+            LOGGER.warn("CSRF protection Cookie not found");
+            return checklist;
+        }
+        checklist.setCsrfTokenPresent(true);
+        if(!activeUser.getCsrfToken().equals(csrfCookie.get().getValue())){
+            log.warn("CSRF Token did not match");
+            String jwt = csrfCookie.get().getValue();
+            if(!csrfTokenUtil.checkJwtToken(jwt)) {
+                LOGGER.warn("CSRF Attack attempt detected. Not a valid token");
+                csrfAttackAttemptEventEvent.fire(new CSRFAttackAttemptEvent());
+                checklist.setCsrfTokenExpired(false);
+                checklist.setCsrfTokenValid(false);
+                return checklist;
+            }else {
+                checklist.setCsrfTokenValid(true);
+                checklist.setCsrfTokenExpired(true);
+                return checklist;
+            }
+        }
+        checklist.setCsrfTokenValid(true);
+        return checklist;
     }
 
     @PostConstruct
@@ -408,13 +449,31 @@ public class FrontiersReqHandler extends ReqHandler {
 
     }
 
-    @Override
-    public boolean handle(RequestContext requestContext) throws ServletException, IOException {
-        if(!isAuthenticRequest(requestContext)) {
-            log.warn("Not an authentic Request");
+
+    private void emmitCSPHeaders(RequestContext context){
+        HttpServletResponse response = context.getResponse();
+        response.setHeader("Access-Control-Allow-Origin",appContext.getOrigin());
+        response.setHeader("Vary","Origin");
+    }
+
+    private boolean securityCheck(RequestContext context){
+        this.emmitCSPHeaders(context);
+        FrontierSecurityChecklist securityChecklist = checkRequest(requestContext);
+        HttpServletResponse response = requestContext.getResponse();
+        if(!securityChecklist.isOriginCheck()||!securityChecklist.isCsrfTokenPresent()||!securityChecklist.isCsrfTokenValid()) {
+            response.setStatus(403);
+            return false;
+        }else if(securityChecklist.isCsrfTokenExpired()){
+            response.setStatus(419);
             return false;
         }
+        return true;
+    }
 
+    @Override
+    public boolean handle(RequestContext requestContext) throws ServletException, IOException {
+        if(!securityCheck(requestContext))
+            return true;
         String[] frontierPair = getFrontierPair(requestContext);
         String invokedClass = frontierPair[0];
         String invokedMethod = frontierPair[1];
@@ -423,39 +482,31 @@ public class FrontiersReqHandler extends ReqHandler {
             requestContext.getResponse().sendError(400);
             return true;
         }
-
         if(!frontierExists(invokedClass)) {
             log.warn("Frontier not found");
             return false;
         }
-
         FrontierClass frontierClass = getFrontier(invokedClass);
         if(!frontierClass.hasMethod(invokedMethod)) {
             log.warn("Frontier method not found");
             return false;
         }
-
         FrontierMethod frontierMethod = frontierClass.getMethod(invokedMethod);
         Map params = matchParams(invokedClass,frontierMethod, requestContext);
         FrontierInvoker frontierInvoker = new FrontierInvoker(frontierClass,frontierMethod,params);
         boolean invocationOK;
-
         try {
-
             if(!accessGranted(frontierClass.getObject().getClass(),frontierMethod.getMethod())){
                 log.warn("Access to frontier method denied");
                 requestContext.getResponse().sendError(403);
                 return true;
             }
             invocationOK = executeFrontier(frontierInvoker,frontierMethod,frontierClass);
-
         }catch (Exception ex){
             return handleException(ex,invokedClass,invokedMethod);
         }
-
         if(invocationOK)
             okInvocationResult(frontierInvoker,frontierClass,frontierMethod);
-
         return invocationOK;
     }
 

@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/XML/1.1.0"
-            xmlns:hi="http://hi-framework.org/XML/1.1.0" elementFormDefault="qualified">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/XML/1.6.0"
+            xmlns:hi="http://hi-framework.org/XML/1.6.0" elementFormDefault="qualified">
 
     <xsd:simpleType name="StringWithAtLeast2Letters">
         <xsd:restriction base="xsd:string">
             <xsd:minLength value="2"></xsd:minLength>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="StringWithAtLeast1Letter">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"></xsd:minLength>
         </xsd:restriction>
     </xsd:simpleType>
 
@@ -40,18 +46,12 @@
         </xsd:all>
     </xsd:complexType>
 
-    <xsd:simpleType name="timeoutValue">
-        <xsd:restriction base="xsd:long">
-            <xsd:minInclusive value="1"></xsd:minInclusive>
-        </xsd:restriction>
-    </xsd:simpleType>
 
     <xsd:complexType name="webType">
         <xsd:all maxOccurs="1" minOccurs="1">
             <xsd:element type="xsd:string" name="views-directory" nillable="false" minOccurs="0" maxOccurs="1"/>
             <xsd:element type="xsd:string" name="welcome-url" nillable="false" minOccurs="0" maxOccurs="1"/>
             <xsd:element type="hi:templatesType" name="templates" nillable="false" minOccurs="0" maxOccurs="1"/>
-            <xsd:element type="hi:timeoutValue" name="default-frontiers-timeout" minOccurs="0" maxOccurs="1"/>
             <xsd:element type="xsd:string" name="base-url" minOccurs="0"/>
         </xsd:all>
     </xsd:complexType>
@@ -64,9 +64,121 @@
         </xsd:sequence>
     </xsd:complexType>
 
-    <xsd:complexType name="frontiersType">
+
+    <xsd:complexType name="frontiersConfig">
         <xsd:sequence>
-            <xsd:element minOccurs="1" maxOccurs="unbounded" name="frontier" type="xsd:string"></xsd:element>
+            <xsd:element name="default-timeout" minOccurs="0">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:long">
+                        <xsd:minInclusive value="1"></xsd:minInclusive>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+            <xsd:element name="security" minOccurs="0">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="cross-site-request-forgery" minOccurs="0">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="token" minOccurs="0">
+                                        <xsd:complexType>
+                                            <xsd:sequence>
+                                                <xsd:element name="jwt-algorithm">
+                                                    <xsd:simpleType>
+                                                        <xsd:restriction base="xsd:string">
+                                                            <xsd:enumeration value="HS256"/>
+                                                            <xsd:enumeration value="HS384"/>
+                                                            <xsd:enumeration value="HS512"/>
+                                                        </xsd:restriction>
+                                                    </xsd:simpleType>
+                                                </xsd:element>
+                                                <xsd:element name="jwt-passphrase" type="hi:StringWithAtLeast2Letters"/>
+                                                <xsd:element name="secure-random-size">
+                                                    <xsd:simpleType>
+                                                        <xsd:restriction base="xsd:int">
+                                                            <xsd:minExclusive value="23"/>
+                                                            <xsd:maxExclusive value="1025"/>
+                                                        </xsd:restriction>
+                                                    </xsd:simpleType>
+                                                </xsd:element>
+                                            </xsd:sequence>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                    <xsd:element name="cookie" minOccurs="0">
+                                        <xsd:complexType>
+                                            <xsd:sequence>
+                                                <xsd:element name="secure" type="xsd:boolean"/>
+                                                <xsd:element name="http-only" type="xsd:boolean"/>
+                                            </xsd:sequence>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="securityConfig">
+        <xsd:sequence>
+            <xsd:element name="content-security-policy">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="reporting-url" type="hi:StringWithAtLeast2Letters" minOccurs="0"/>
+                        <xsd:element name="deny-iframe-embedding" type="xsd:boolean"/>
+                        <xsd:element name="block-mixed-content" type="xsd:boolean"/>
+                        <xsd:element name="policy-allow" minOccurs="0">
+                            <xsd:complexType>
+                                <xsd:sequence>
+                                    <xsd:element name="navigation">
+                                        <xsd:complexType>
+                                            <xsd:sequence>
+                                                <xsd:element name="form-action" type="hi:StringWithAtLeast1Letter" minOccurs="0"/>
+                                            </xsd:sequence>
+                                            <xsd:attribute name="to" type="hi:StringWithAtLeast1Letter"/>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                    <xsd:element name="content">
+                                        <xsd:complexType>
+                                            <xsd:sequence>
+                                                <xsd:element name="images" minOccurs="0">
+                                                    <xsd:complexType>
+                                                        <xsd:attribute name="from" type="hi:StringWithAtLeast1Letter" use="required"/>
+                                                    </xsd:complexType>
+                                                </xsd:element>
+                                                <xsd:element name="scripts" minOccurs="0">
+                                                    <xsd:complexType>
+                                                        <xsd:attribute name="from" type="hi:StringWithAtLeast1Letter" use="required"/>
+                                                    </xsd:complexType>
+                                                </xsd:element>
+                                                <xsd:element name="styles" minOccurs="0">
+                                                    <xsd:complexType>
+                                                        <xsd:attribute name="from" type="hi:StringWithAtLeast1Letter" use="required"/>
+                                                    </xsd:complexType>
+                                                </xsd:element>
+                                                <xsd:element name="media" minOccurs="0">
+                                                    <xsd:complexType>
+                                                        <xsd:attribute name="from" type="hi:StringWithAtLeast1Letter" use="required"/>
+                                                    </xsd:complexType>
+                                                </xsd:element>
+                                                <xsd:element name="objects" minOccurs="0">
+                                                    <xsd:complexType>
+                                                        <xsd:attribute name="from" type="hi:StringWithAtLeast1Letter" use="required"/>
+                                                    </xsd:complexType>
+                                                </xsd:element>
+                                            </xsd:sequence>
+                                            <xsd:attribute name="from" type="hi:StringWithAtLeast1Letter"/>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -195,11 +307,13 @@
 
     <xsd:complexType name="appType">
         <xsd:all>
-            <xsd:element type="xsd:string" name="default-lang" nillable="false" maxOccurs="1" minOccurs="0"></xsd:element>
-            <xsd:element type="hi:appModeType" name="deployment-mode" nillable="false" maxOccurs="1" minOccurs="0" ></xsd:element>
-            <xsd:element type="hi:webType" name="web" minOccurs="0" nillable="false" maxOccurs="1"></xsd:element>
-            <xsd:element type="hi:i18nType" name="i18n" minOccurs="0" maxOccurs="1" nillable="false"></xsd:element>
-            <xsd:element type="hi:tunningType" name="web-tuning" nillable="false" minOccurs="0" maxOccurs="1"></xsd:element>
+            <xsd:element type="xsd:string" name="default-lang" nillable="false" maxOccurs="1" minOccurs="0"/>
+            <xsd:element type="hi:appModeType" name="deployment-mode" nillable="false" maxOccurs="1" minOccurs="0"/>
+            <xsd:element type="hi:frontiersConfig" name="frontiers" minOccurs="0" nillable="false" maxOccurs="1"/>
+            <xsd:element type="hi:webType" name="web" minOccurs="0" nillable="false" maxOccurs="1"/>
+            <xsd:element type="hi:securityConfig" name="security" minOccurs="0" nillable="false" maxOccurs="1"/>
+            <xsd:element type="hi:i18nType" name="i18n" minOccurs="0" maxOccurs="1" nillable="false"/>
+            <xsd:element type="hi:tunningType" name="web-tuning" nillable="false" minOccurs="0" maxOccurs="1"/>
         </xsd:all>
     </xsd:complexType>
 
