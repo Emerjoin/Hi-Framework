@@ -27,10 +27,10 @@ public class Security {
 
         private String defaultContentSource="* 'unsafe-inline'";
         private String scriptContentSource="* 'unsafe-inline' 'unsafe-eval'";
-        private String objectContentSource="";
-        private String imageContentSource="";
-        private String mediaContentSource="";
-        private String styleContentSource="";
+        private String objectContentSource="*";
+        private String imageContentSource="*";
+        private String mediaContentSource="*";
+        private String styleContentSource="*";
 
         public boolean isDenyIframeEmbeding() {
             return denyIframeEmbeding;

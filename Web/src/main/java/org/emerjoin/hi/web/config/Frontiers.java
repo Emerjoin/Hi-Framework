@@ -11,7 +11,7 @@ public class Frontiers {
 
             public class Token {
 
-                private String jwtAlgorithm = "H256";
+                private String jwtAlgorithm = "HS256";
                 private String jwtPassphrase = "10045084-f522-4faa-afa4-bdbc955faa47";
                 private int secureRandomSize = 64;
 
