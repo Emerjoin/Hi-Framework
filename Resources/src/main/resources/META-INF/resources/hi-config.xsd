@@ -132,7 +132,7 @@
                         <xsd:element name="policy-allow" minOccurs="0">
                             <xsd:complexType>
                                 <xsd:sequence>
-                                    <xsd:element name="navigation">
+                                    <xsd:element name="navigation" minOccurs="0">
                                         <xsd:complexType>
                                             <xsd:sequence>
                                                 <xsd:element name="form-action" type="hi:StringWithAtLeast1Letter" minOccurs="0"/>
@@ -140,7 +140,7 @@
                                             <xsd:attribute name="to" type="hi:StringWithAtLeast1Letter"/>
                                         </xsd:complexType>
                                     </xsd:element>
-                                    <xsd:element name="content">
+                                    <xsd:element name="content" minOccurs="0">
                                         <xsd:complexType>
                                             <xsd:sequence>
                                                 <xsd:element name="images" minOccurs="0">

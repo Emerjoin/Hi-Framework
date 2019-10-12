@@ -25,12 +25,12 @@ public class Security {
 
         private String reportingUrl="";
 
-        private String defaultContentSource="* 'unsafe-inline'";
-        private String scriptContentSource="* 'unsafe-inline' 'unsafe-eval'";
         private String objectContentSource="*";
-        private String imageContentSource="*";
-        private String mediaContentSource="*";
-        private String styleContentSource="* 'unsafe-inline'";
+        private String imageContentSource="* 'self'";
+        private String mediaContentSource="* 'self'";
+        private String styleContentSource="* 'self' 'unsafe-inline'";
+        private String defaultContentSource="* 'self' 'unsafe-inline'";
+        private String scriptContentSource="* 'unsafe-inline' 'unsafe-eval'";
 
         public boolean isDenyIframeEmbeding() {
             return denyIframeEmbeding;
