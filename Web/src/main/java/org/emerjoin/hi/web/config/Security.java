@@ -30,7 +30,7 @@ public class Security {
         private String objectContentSource="*";
         private String imageContentSource="*";
         private String mediaContentSource="*";
-        private String styleContentSource="*";
+        private String styleContentSource="* 'unsafe-inline'";
 
         public boolean isDenyIframeEmbeding() {
             return denyIframeEmbeding;
