@@ -2380,6 +2380,7 @@ Hi.$frontiers.Promise = function(){
     var overequestCallback = undefined;
     var catchCallback = undefined;
     var finallyCallback = undefined;
+    var exceptionCallbacks = {};
 
     var request = undefined;
 
@@ -2592,17 +2593,27 @@ Hi.$frontiers.Promise = function(){
 
     };
 
-    this._setException = function(type){
+    this._setException = function(ex){
+
+        if(typeof ex != "number"){
+            var exceptionType = ex.type;
+            var exceptionDetails = ex.details;
+            if(exceptionCallbacks.hasOwnProperty(exceptionType)){
+                var callback = exceptionCallbacks[exceptionType];
+                callback.call(this,exceptionDetails);
+                this._setRequestFinished();
+                return;
+            }
+        }
 
         var gErrorHandler = getGlobalHandler("catch");
-
         if(typeof catchCallback=="function") {
 
-            catchCallback.call(this, type);
+            catchCallback.call(this, ex);
 
         }else if(typeof gErrorHandler=="function") {
 
-            gErrorHandler.call(getGlobalHandlers(), this, type);
+            gErrorHandler.call(getGlobalHandlers(), this, ex);
 
         }
 
@@ -2611,8 +2622,6 @@ Hi.$frontiers.Promise = function(){
     };
 
     //--public interface
-
-
     this.try = function(obj) {
 
 
@@ -2699,14 +2708,15 @@ Hi.$frontiers.Promise = function(){
 
     };
 
-    this.catch = function(callback){
-
-        if(typeof callback!="function")
+    this.catch = function(param1, param2){
+        if((typeof param1 == "string") && (typeof param2 == "function")){
+            exceptionCallbacks[param1] = param2;
+        }else if(typeof param1 == "function") {
+            catchCallback = param1;
+        }else{
             throw new Error("Wrong parameters");
-
-        catchCallback = callback;
+        }
         return this;
-
     };
 
     this.getRequest = function(){
@@ -3037,18 +3047,16 @@ var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fa
             var errorText = jqXml.responseText;
             var exceptionType = undefined;
 
-            try {
-
+            try{
                 var responseJSON = JSON.parse(errorText);
                 if (responseJSON.hasOwnProperty("type") && responseJSON.hasOwnProperty("details")) {
                     promisse._setException(responseJSON);
                     return;
                 }
-
-            } catch (err) {
-
+            }catch(err){
+                console.error(err);
+                return;
             }
-
 
             //Request aborted
             if (errText == "abort") {
