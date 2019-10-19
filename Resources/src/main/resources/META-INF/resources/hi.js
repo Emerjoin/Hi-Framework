@@ -2408,7 +2408,7 @@ Hi.$frontiers.Promise = function(){
         request = req;
     };
 
-    this.retry = function(){
+    this.replay = function(){
         this._executePrepare();
         delegate.call(this);
     };
