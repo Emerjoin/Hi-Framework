@@ -18,8 +18,7 @@ Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-st
 ### Optional callback on try
 Now you no longer need to supply a callback for the try function when calling a frontier.
 ```javascript
-
-	MyFrontier.something(param1,param2).try()
+MyFrontier.something(param1,param2).try()
     .catch('MyException',function(ex){
    		//Do something with the exception
     });
@@ -28,7 +27,7 @@ Now you no longer need to supply a callback for the try function when calling a 
 ### Prepare callback function
 Now you can define a callback to be invoked before the frontier call is performed. This callback is also be invoked when the frontier call is retried. The idea is to use this callback to perform some UI initialization.
 ```javascript
-	MyFrontier.something(param1,param2).try()
+MyFrontier.something(param1,param2).try()
     .prepare(function(){
     	//Do some preparation here
     }).catch('MyException',function(ex){
@@ -57,7 +56,7 @@ Hi.template({
 The finnaly callback now receives a boolean that indicates whether the frontier call ended successfully or not.
 
 ```javascript
-	MyFrontier.something(param1,param2).try(function(obj){
+MyFrontier.something(param1,param2).try(function(obj){
     	//Do something with the object
     }).prepare(function(){
     	//Do some preparation here
@@ -72,7 +71,7 @@ The finnaly callback now receives a boolean that indicates whether the frontier 
 You can now attach a descriptor to a frontier call. This descriptor will be accessible to all the frontier callbacks and to the Frontier global event handlers. Anything can be passed as a descriptor. It might be an object, a number or just a string.
 
 ```javascript
-	MyFrontier.something(param1,param2).try(function(obj){
+MyFrontier.something(param1,param2).try(function(obj){
     	//Do something with the object
     }).as({id:"something",message:"Doing something now"});
 ```
@@ -82,7 +81,7 @@ Any frontier call can now be replayed, causing the call to be executed again. A 
 
 #### Replaying a call from a callback
 ```javascript
-	MyFrontier.something(param1,param2).try(function(obj){
+MyFrontier.something(param1,param2).try(function(obj){
     	//Do something with the object
     }).catch('MyException',function(ex){
     	//Triggering a replay
