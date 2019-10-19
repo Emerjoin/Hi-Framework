@@ -2381,123 +2381,88 @@ Hi.$frontiers.Promise = function(){
     var catchCallback = undefined;
     var finallyCallback = undefined;
     var exceptionCallbacks = {};
+    var delegate = undefined;
+    var descriptor = undefined;
+    var prepareCallback = function(){
+
+    };
 
     var request = undefined;
 
     var getGlobalHandler = function(name){
-
         if(__.hasOwnProperty("$frontiers")) {
-
             if (__.$frontiers.hasOwnProperty(name))
                 return __.$frontiers[name];
-
         }
-
         return undefined;
-
     };
 
     var getGlobalHandlers = function(){
-
         if(__.hasOwnProperty("$frontiers")) {
-
             return __.$frontiers;
-
         }
-
         return undefined;
-
     };
 
     this._setRequest = function(req){
-
         request = req;
+    };
 
+    this.retry = function(){
+        this._executePrepare();
+        delegate.call(this);
     };
 
     this._setResult = function(data){
-
-        if(typeof setTo.callback=="function")
+        if(typeof setTo.callback=="function"){
             setTo.callback.call(this,data);
-
-
-
-        this._setRequestFinished();
-
+        }else {
+            var gSuccessHandler = getGlobalHandler("success");
+            if (typeof gSuccessHandler == "function")
+                gSuccessHandler.call(getGlobalHandlers(),this);
+        }
+        this._setRequestFinished(true);
     };
 
-    this._setRequestFinished = function(){
-
+    this._setRequestFinished = function(success){
         if(typeof finallyCallback=="function")
-
-            finallyCallback.call(this);
-
+            finallyCallback.call(this,success);
         else{
-
             var handler = getGlobalHandler("finally");
-
             if(typeof handler!="undefined") {
-
-                handler.call(getGlobalHandlers(),this);
-
+                handler.call(getGlobalHandlers(),this,success);
             }
-
         }
-
     };
 
     this._setHttpError = function(code){
-
-
         if(typeof catchCallback=="function"){
-
             catchCallback.call(this,code);
-
         }else{
-
             var handler = getGlobalHandler("catch");
-
             if(typeof handler!="undefined") {
-
                 handler.call(getGlobalHandlers(),this,code);
-
             }
-
         }
-
-        this._setRequestFinished();
-
+        this._setRequestFinished(false);
     };
 
     this._setTimedOut = function(){
-
         var gTimeoutHandler = getGlobalHandler("timeout");
         var gErrorHandler = getGlobalHandler("catch");
-
         if(typeof timeoutCallback=="function") {
-
             timeoutCallback.call(this);
-
-        }else if(gTimeoutHandler=="function"){
-
+        }else if(typeof gTimeoutHandler=="function"){
             gTimeoutHandler.call(getGlobalHandlers(),this);
-
         }else if(typeof catchCallback=="function"){
-
             this._setHttpError(408);
-
         }else if(typeof gErrorHandler=="function"){
-
             gErrorHandler.call(getGlobalHandlers(),this,408);
-
         }
-
-        this._setRequestFinished();
-
+        this._setRequestFinished(false);
     };
 
     this._setExpired = function(){
-
         var gExpiredHandler = getGlobalHandler("expired");
         var gErrorHandler = getGlobalHandler("catch");
 
@@ -2507,205 +2472,154 @@ Hi.$frontiers.Promise = function(){
             gErrorHandler.call(getGlobalHandlers(),419);
         }
 
-        this._setRequestFinished();
-
+        this._setRequestFinished(false);
     };
 
     this._setForbidden = function(){
-
         var gForbiddenHandler = getGlobalHandler("forbidden");
         var gErrorHandler = getGlobalHandler("catch");
 
         if(typeof forbiddenCallback=="function") {
-
             forbiddenCallback.call(this);
-
         }else if(typeof gForbiddenHandler=="function"){
-
             gForbiddenHandler.call(getGlobalHandlers(),this);
-
         }else if(typeof catchCallback=="function"){
-
             this._setHttpError(403);
-
         }else if(typeof gErrorHandler=="function"){
-
             gErrorHandler.call(getGlobalHandlers(),403);
-
         }
-
-        this._setRequestFinished();
-
+        this._setRequestFinished(false);
     };
 
     this._setInterrupted = function(){
-
         var gInterruptedHandler = getGlobalHandler("interrupted");
         var gErrorHandler = getGlobalHandler("catch");
 
         if(typeof interruptedCallback=="function") {
-
             interruptedCallback.call(this);
-
         }else if(typeof gInterruptedHandler=="function"){
-
             gInterruptedHandler.call(getGlobalHandlers(),this);
-
         }else if(typeof catchCallback=="function"){
-
             this._setHttpError(452);
-
         }else if(typeof gErrorHandler=="function"){
-
             gErrorHandler.call(getGlobalHandlers(),this,452);
-
         }
-
-        this._setRequestFinished();
-
+        this._setRequestFinished(false);
     };
 
     this._setOverRequest = function(){
-
-
         var gOverequestHandler = getGlobalHandler("overrequest");
         var gErrorHandler = getGlobalHandler("catch");
 
         if(typeof overequestCallback=="function") {
-
             overequestCallback.call(this);
-
         }else if(typeof gOverequestHandler=="function") {
-
-            gOverequestHandler.call(getGlobalHandlers(), this);
-
+            gOverequestHandler.call(getGlobalHandlers(),this);
         }else if(typeof catchCallback=="function"){
-
             this._setHttpError(429);
-
         }else if(typeof gErrorHandler=="function"){
-
             catchCallback.call(getGlobalHandlers(),this,429);
         }
-
-        this._setRequestFinished();
-
-
+        this._setRequestFinished(false);
     };
 
     this._setException = function(ex){
-
         if(typeof ex != "number"){
             var exceptionType = ex.type;
             var exceptionDetails = ex.details;
             if(exceptionCallbacks.hasOwnProperty(exceptionType)){
                 var callback = exceptionCallbacks[exceptionType];
                 callback.call(this,exceptionDetails);
-                this._setRequestFinished();
+                this._setRequestFinished(false);
                 return;
             }
         }
-
         var gErrorHandler = getGlobalHandler("catch");
         if(typeof catchCallback=="function") {
-
             catchCallback.call(this, ex);
-
         }else if(typeof gErrorHandler=="function") {
-
             gErrorHandler.call(getGlobalHandlers(), this, ex);
-
         }
-
-        this._setRequestFinished();
-
+        this._setRequestFinished(false);
     };
 
+    this._setDelegate = function(fun){
+        delegate = fun;
+    };
+
+    this._executePrepare = function(){
+        prepareCallback.call(this);
+    }
+
     //--public interface
+    this.descriptor = {};
+
     this.try = function(obj) {
-
-
         if(typeof obj=="function"){
-
             setTo.callback = obj;
-
-        }else{
-
-            throw new Error("Wrong parameters");
-
         }
-
         return this;
+    };
 
+    this.then = this.try;
+
+    this.prepare = function(callback){
+        if(typeof callback != "function")
+            return;
+        callback.call(this);
+        prepareCallback = callback;
+        return this;
     };
 
     this.finally = function(obj){
-
         if(typeof obj=="function"){
-
             finallyCallback = obj;
-
         }else{
-
             throw new Error("Wrong parameters");
-
         }
-
         return this;
-
     };
 
     this.run = function(){
 
-
-
     };
 
     this.do = function(){
-
         this.run();
+    };
 
+    this.as = function(obj){
+        this.descriptor = obj;
+        return this;
     };
 
     this.forbidden = function(callback){
-
         if(typeof callback!="function")
             throw new Error("Wrong parameters");
-
         forbiddenCallback = callback;
         return this;
-
     };
 
     this.timeout = function(callback){
-
         if(typeof callback!="function")
             throw new Error("Wrong parameters");
-
         timeoutCallback = callback;
         return this;
-
     };
 
 
     this.interrupted = function(callback){
-
         if(typeof callback!="function")
             throw new Error("Wrong parameters");
-
         interruptedCallback = callback;
         return this;
-
     };
 
     this.overrequest = function(callback){
-
         if(typeof callback!="function")
             throw new Error("Wrong parameters");
-
         overequestCallback = callback;
         return this;
-
     };
 
     this.catch = function(param1, param2){
@@ -3139,11 +3053,18 @@ var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fa
         ajaxParams.processData = false;
         ajaxParams.contentType = false;
         ajaxParams.data = form;
+        ajaxParams.beforeSend = function(){
+            promisse._executePrepare();
+        };
     }
 
-    var $req = $.ajax(ajaxParams);
-    promisse._setRequest($req);
-    $req.$params = JSON.stringify(params);
-    $fiis[_$fmut] = $req;
+    var delegate = function(){
+         var $req = $.ajax(ajaxParams);
+         promisse._setRequest($req);
+         $req.$params = JSON.stringify(params);
+         $fiis[_$fmut] = $req;
+    };
+    promisse._setDelegate(delegate);
+    delegate.call(this);
     return promisse;
 };
