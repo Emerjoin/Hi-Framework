@@ -8,6 +8,7 @@ Please read the documentation at [https://docs.hi-framework.org/1.1.0/getting-st
 # 1.9.0 Changes
 * WebEvents Introduced
 * Content-expiry event handler decoupled from frontiers
+* Apache-tika updated to 1.22 (security vulnerability fixed)
 
 
 ## WebEvents
