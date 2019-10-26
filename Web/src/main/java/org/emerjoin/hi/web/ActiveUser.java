@@ -1,15 +1,19 @@
 package org.emerjoin.hi.web;
 
-import org.emerjoin.hi.web.security.CsrfTokenUtil;
+import org.emerjoin.hi.web.events.sse.AbstractChannelEvent;
+import org.emerjoin.hi.web.events.sse.ChannelJoinEvent;
+import org.emerjoin.hi.web.events.sse.ChannelQuitEvent;
+import org.emerjoin.hi.web.security.SecureTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
-import javax.xml.bind.DatatypeConverter;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
+import java.util.List;
 
 /**
  * @author Mário Júnior
@@ -18,21 +22,32 @@ import java.util.UUID;
 @SessionScoped
 public class ActiveUser implements Serializable {
 
+    private String uniqueId = null;
+    private String webEventChannel = "default";
+    private List<String> webEventSubscriptions = new ArrayList<>();
     private String csrfToken = "";
+    private String eventsToken = "";
     private HashMap<String,Object> data = new HashMap<>();
     private static final Logger _log = LoggerFactory.getLogger(ActiveUser.class);
-    private static final CsrfTokenUtil csrfTokeUtil = new CsrfTokenUtil();
+    private static final SecureTokenUtil csrfTokeUtil = new SecureTokenUtil();
+
+    @Inject
+    private transient Event<AbstractChannelEvent> channelEvent;
 
     @PostConstruct
     public void init(){
-        _log.debug("Generating User CSRF token...");
         this.csrfToken = csrfTokeUtil.makeJwtToken();
+        this.eventsToken = csrfTokeUtil.makeJwtToken();
+        this.uniqueId = UUID.randomUUID().toString();
     }
 
-    public String expireCsrfToken(){
-        _log.debug("Expiring current CSRF token...");
-        return this.csrfToken = csrfTokeUtil
-                .makeJwtToken();
+    public void expireTokens(){
+        this.csrfToken = csrfTokeUtil.makeJwtToken();
+        this.eventsToken = csrfTokeUtil.makeJwtToken();
+    }
+
+    public String getEventsToken() {
+        return eventsToken;
     }
 
     public String getCsrfToken() {
@@ -64,5 +79,43 @@ public class ActiveUser implements Serializable {
 
         data.put(name,value);
 
+    }
+
+    public List<String> getWebEventSubscriptions() {
+        return Collections.unmodifiableList(
+                webEventSubscriptions);
+    }
+
+    public void subscribe(String webEventChannel) {
+        if (webEventChannel == null || webEventChannel.isEmpty())
+            throw new IllegalArgumentException("webEventChannel must not be null nor empty");
+        this.webEventSubscriptions.add(webEventChannel);
+        channelEvent.fire(new ChannelJoinEvent(uniqueId, webEventChannel));
+    }
+
+    public void unsubscribe(String webEventChannel){
+        if(webEventChannel==null||webEventChannel.isEmpty())
+            throw new IllegalArgumentException("webEventChannel must not be null nor empty");
+        if(this.webEventSubscriptions.remove(webEventChannel))
+            channelEvent.fire(new ChannelQuitEvent(uniqueId,webEventChannel));
+    }
+
+    public boolean isSubscribedTo(String webEventChannel){
+        if(webEventChannel==null||webEventChannel.isEmpty())
+            throw new IllegalArgumentException("webEventChannel must not be null nor empty");
+        return this.webEventSubscriptions.contains(
+                webEventChannel);
+    }
+
+    public String getWebEventChannel() {
+        return webEventChannel;
+    }
+
+    public void setWebEventChannel(String webEventChannel) {
+        this.webEventChannel = webEventChannel;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
     }
 }

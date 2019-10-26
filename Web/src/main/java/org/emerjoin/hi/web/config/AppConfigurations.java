@@ -31,6 +31,7 @@ public class AppConfigurations {
     private DeploymentMode deploymentMode = DeploymentMode.DEVELOPMENT;
     private Frontiers frontiersConfig = new Frontiers();
     private Security securityConfig = new Security();
+    private Events eventsConfig = new Events();
     private Logger _log = LoggerFactory.getLogger(AppConfigurations.class);
 
     public static enum DeploymentMode {
@@ -205,4 +206,17 @@ public class AppConfigurations {
     public void setSecurityConfig(Security securityConfig) {
         this.securityConfig = securityConfig;
     }
+
+    public Events getEventsConfig(){
+
+        return this.eventsConfig;
+
+    }
+
+    public void setEventsConfig(Events eventsConfig){
+
+        this.eventsConfig = eventsConfig;
+
+    }
+
 }

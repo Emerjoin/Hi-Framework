@@ -206,7 +206,8 @@ public class Controller {
         Frontiers.Security.CrossSiteRequestForgery.Cookie cookieConfig = crossSiteRequestForgery
                 .getCookie();
         HttpServletResponse response = context.getResponse();
-        String token = activeUser.expireCsrfToken();
+        activeUser.expireTokens();
+        String token = activeUser.getCsrfToken();
         Cookie cookie = new Cookie(Frontiers.Security.CrossSiteRequestForgery.Cookie.NAME,token);
         cookie.setHttpOnly(cookieConfig.isHttpOnly());
         cookie.setSecure(cookieConfig.isSecure());

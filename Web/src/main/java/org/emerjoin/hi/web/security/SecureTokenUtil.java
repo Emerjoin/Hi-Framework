@@ -16,9 +16,9 @@ import java.util.UUID;
 /**
  * @author Mario Junior.
  */
-public class CsrfTokenUtil {
+public class SecureTokenUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsrfTokenUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecureTokenUtil.class);
 
     private String makeSecureRandom(){
         AppConfigurations appConfigurations = AppConfigurations.get();

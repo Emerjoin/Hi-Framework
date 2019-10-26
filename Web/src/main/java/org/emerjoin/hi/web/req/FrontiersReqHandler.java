@@ -5,7 +5,6 @@ import org.emerjoin.hi.web.ActiveUser;
 import org.emerjoin.hi.web.AppContext;
 import org.emerjoin.hi.web.FrontEnd;
 import org.emerjoin.hi.web.RequestContext;
-import org.emerjoin.hi.web.config.AppConfigurations;
 import org.emerjoin.hi.web.config.ConfigProvider;
 import org.emerjoin.hi.web.config.Frontiers;
 import org.emerjoin.hi.web.events.CSRFAttackAttemptEvent;
@@ -20,7 +19,7 @@ import org.emerjoin.hi.web.frontier.model.FrontierClass;
 import org.emerjoin.hi.web.frontier.model.FrontierMethod;
 import org.emerjoin.hi.web.frontier.model.MethodParam;
 import org.emerjoin.hi.web.mvc.HTMLizer;
-import org.emerjoin.hi.web.security.CsrfTokenUtil;
+import org.emerjoin.hi.web.security.SecureTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +82,7 @@ public class FrontiersReqHandler extends ReqHandler {
     private Gson gson = null;
 
     private Base64.Decoder decoder = Base64.getDecoder();
-    private CsrfTokenUtil csrfTokenUtil = new CsrfTokenUtil();
+    private SecureTokenUtil csrfTokenUtil = new SecureTokenUtil();
 
     private Object getParamValue(String frontier,FrontierMethod frontierMethod, MethodParam methodParam,
                                  Map<String,Object> uploadsMap,Map<String,Object> argsMap,

@@ -273,6 +273,104 @@ Hi.$test.view = function(path){
 
 };
 
+/**
+ * - - - - - - - - - - - - -
+ * EVENTS
+ * - - - - - - - - - - - - -
+ */
+
+Hi.$events = {};
+Hi.$events.state = {};
+Hi.$events.state.ready = false;
+Hi.$events.source = undefined;
+Hi.$events.callbacks = {};
+Hi.$events.callbacks.ready = [];
+Hi.$events.callbacks.offline = [];
+
+Hi.$events.ready = function(callback){
+    if(typeof callback != "function")
+        throw new Error("callback must be function");
+    Hi.$events.callbacks.ready.push(
+            callback);
+};
+
+Hi.$events.offline = function(callback){
+    if(typeof callback != "function")
+        throw new Error("callback must be function");
+    Hi.$events.callbacks.offline.push(
+            callback);
+};
+
+Hi.$events.Listener = function(type,callback,source){
+
+    this.type = type;
+    this.callback = callback;
+    this.source = source;
+
+    var context = this;
+
+    var eventListener = function(event){
+        callback.call(context, JSON.parse(event.data));
+    };
+
+    source.addEventListener(type,eventListener);
+
+    this.off = function(){
+        source.removeEventListener(type,eventListener);
+    }
+
+};
+
+Hi.$events.ViewContext = function(){
+
+    this.listeners = [];
+
+    this.listen = function(type,callback){
+        var listener = new Hi.$events.Listener(type,callback,Hi.$events.source);
+        this.listeners.push(listener);
+    }
+
+    this.destroy = function(){
+        this.listeners.forEach(function(listener){
+            listener.off();
+        });
+    };
+
+}
+
+Hi.$on = function(type,callback){
+   var listener = new Hi.$events.Listener(type,callback,Hi.$events.source);
+}
+
+Hi.$events.init = function(){
+   var source = new EventSource(App.base_url+"event-stream?token="+App.eventsToken);
+   source.onerror = function(){
+      if(!Hi.$events.state.ready)
+           return;
+      Hi.$events.state.ready = false;
+      Hi.$events.callbacks.offline.forEach(function(fun){
+           fun.call();
+      });
+   };
+   source.onopen = function(){
+      Hi.$events.state.ready = true;
+      Hi.$events.callbacks.ready.forEach(function(fun){
+           fun.call();
+      });
+   };
+
+   Hi.$events.source = source;
+   Hi.$on("ContentExpiredEvent",function(event){
+        if(__.hasOwnProperty("$expired")){
+            var contentExpiredHandler = __["$expired"];
+            if(typeof contentExpiredHandler == "function"){
+                contentExpiredHandler.call();
+            }
+        }
+   });
+}
+
+
 //Packages definitions end here
 
 
@@ -794,26 +892,22 @@ Hi.$angular.run = function(){
         if(typeof App!="undefined") {
 
             if (typeof appRun == "function") {
-
                 Hi.$angular.$injector.invoke(appRun);
-
             }
 
             if (typeof $startup != "function") {
-
                 throw new Error("$startup function is undefined");
-
             }
 
             //TODO: Review this code
             setTimeout(function () {
-
                 $startup();
-
             }, 5);
 
 
         }
+
+        Hi.$events.init();
 
     };
 
@@ -821,16 +915,13 @@ Hi.$angular.run = function(){
     angularApp.run(runapp);
     Hi.$angular.app = angularApp;
 
-
 };
-
 
 /**
  * - - - - - - - -
  * UI
  * - - - - - - - -
  */
-
 //HTML Cache
 Hi.$ui.html.cache = {on:true};
 
@@ -1152,7 +1243,10 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
 
     }
 
-
+    viewScope.$events = new Hi.$events.ViewContext();
+    viewScope.$on = function(type,callback){
+        viewScope.$events.listen(type,callback);
+    };
 
     //Inject the scope to the controller function
     var $injector = Hi.$angular.$injector;
@@ -1169,9 +1263,7 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
     //Apply context variables
     Hi.$ui.js.setScopeProps(viewScope,context_variables);
 
-
     //PreLoad on view
-
     if(viewScope.hasOwnProperty('$preLoad')){
 
 
@@ -1192,16 +1284,12 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
 
             var newMarkup = __.$onPreLoad.call(__,viewScope.$route, viewScope, markup);
             if (typeof newMarkup != "undefined") {
-
                 markup = newMarkup;
-
             }
 
         }
 
     }
-
-
 
     var compileFn = Hi.$angular.$compile(markup);
     var compiledElement = compileFn(viewScope);
@@ -1215,14 +1303,10 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
     };
 
     if(receptor && embedded){
-
         //NOTE: if embedded is true, then receptor will also be true
-
-        receptor.element =compiledElement;
+        receptor.element = compiledElement;
         receptor.scope = viewScope;
         receptor.markup = markup;
-
-
 
         if(typeof viewScope.$postLoad!="undefined"){
 
@@ -1231,19 +1315,14 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
         }
 
         //Change the Path
-
         var setPageLocation = Hi.$config.nav.changeLocation;
 
         if(embedded)
             setPageLocation = false;
 
-
         if(setPageLocation){
-
            changePath();
-
         }
-
 
         return receptor;
 
@@ -1261,106 +1340,68 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
 
         var isRedirect = __.hasOwnProperty("$activeView");
 
-
         //Tell the template that there is another active view
+
+        if(typeof __.$activeView != "undefined"){
+            __.$activeView.$events.destroy();
+        }
         __.$activeView = viewScope;
         Hi.$view = viewScope;
 
-
         $("#view_content").html("");
         $("#view_content").append(compiledElement);
-
 
         //Change the path
         var setPageLocation = Hi.$config.nav.changeLocation;
 
         if(setPageLocation&&isRedirect){
-
             changePath();
-
         }
 
-
         Hi.$nav.isGoingBack = false;
-
         viewScope.$apply(function(){
-
-
             if(typeof viewScope.$postLoad!="undefined"){
-
                 viewScope.$postLoad.call(viewScope);
-
             }
 
             if(__.hasOwnProperty("$onPostLoad")){
-
                 if(typeof __.$onPostLoad=="function"){
-
                     __.$onPostLoad.call(__,viewScope.$route,viewScope);
-
                 }
-
             }
-
 
             if(__.hasOwnProperty("$onRedirectFinish")&&isRedirect){
-
                 if(typeof __.$onRedirectFinish=="function"){
-
                     __.$onRedirectFinish.call(__);
-
                 }
-
             }
-
         });
 
-
     };
-
 
     //Close the active view first
     if(__.hasOwnProperty("$activeView")){
 
-
         if(typeof __.$activeView=="object"){
-
 
             //is close prevent active?
             if(__.$activeView.hasOwnProperty("$preventClose")&&__.$activeView.hasOwnProperty("$close")){
-
-
                 if(__.$activeView.$preventClose){
-
                     __.$activeView.$close.call(__.$activeView,closePromise);
-
                 }else{
-
                     closePromise.proceed();
-
                 }
-
-
             }else{
-
                 if(typeof __.$activeView.$close=="function"){
-
                     //Call the close handler on the view
                     __.$activeView.$close.call(__.$activeView);
-
                     closePromise.proceed();
-
                 }else{
-
                     closePromise.proceed();
-
                 }
-
             }
 
-
             Hi.$nav.isGoingBack = false;
-
 
         }else{
 
@@ -1369,6 +1410,7 @@ Hi.$ui.js.createViewScope = function(viewPath,context_variables,markup,embedded,
         }
 
     }else{
+
 
         closePromise.proceed();
 
@@ -2368,7 +2410,6 @@ Hi.$nav.toSlashes = function(route){
 /**
  * FRONTIERS
  */
-
 Hi.$frontiers = {};
 Hi.$frontiers.Promise = function(){
 
@@ -2463,16 +2504,14 @@ Hi.$frontiers.Promise = function(){
     };
 
     this._setExpired = function(){
-        var gExpiredHandler = getGlobalHandler("expired");
-        var gErrorHandler = getGlobalHandler("catch");
-
-        if(typeof gExpiredHandler=="function"){
-            gExpiredHandler.call(getGlobalHandlers(),this);
-        }else if(typeof gErrorHandler=="function"){
-            gErrorHandler.call(getGlobalHandlers(),419);
+        var contentExpiredHandler =  undefined;
+        if(__.hasOwnProperty("$expired")){
+            contentExpiredHandler = __["$expired"];
         }
-
-        this._setRequestFinished(false);
+        if(typeof contentExpiredHandler != "undefined"){
+            contentExpiredHandler.call();
+        }
+        this._setException(419);
     };
 
     this._setForbidden = function(){
@@ -2960,16 +2999,17 @@ var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fa
         error: function (jqXml, errText, httpError) {
             var errorText = jqXml.responseText;
             var exceptionType = undefined;
-
-            try{
-                var responseJSON = JSON.parse(errorText);
-                if (responseJSON.hasOwnProperty("type") && responseJSON.hasOwnProperty("details")) {
-                    promisse._setException(responseJSON);
+            if(typeof errorText === "string" && errorText !== "" && errorText.length > 0){
+                try{
+                    var responseJSON = JSON.parse(errorText);
+                    if (responseJSON.hasOwnProperty("type") && responseJSON.hasOwnProperty("details")) {
+                        promisse._setException(responseJSON);
+                        return;
+                    }
+                }catch(err){
+                    console.error(err);
                     return;
                 }
-            }catch(err){
-                console.error(err);
-                return;
             }
 
             //Request aborted
@@ -2978,7 +3018,6 @@ var fMx = function(params,$functionUrl,_$tout,_$fmut,_$si,_$si_method,_$abpon,fa
             } else if (errText == "timeout") {
                 promisse._setTimedOut();
             } else {
-
                 switch (jqXml.status) {
                     case 403:
                         promisse._setForbidden();

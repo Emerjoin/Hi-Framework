@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/XML/1.6.0"
-            xmlns:hi="http://hi-framework.org/XML/1.6.0" elementFormDefault="qualified">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://hi-framework.org/XML/1.9.0"
+            xmlns:hi="http://hi-framework.org/XML/1.9.0" elementFormDefault="qualified">
 
     <xsd:simpleType name="StringWithAtLeast2Letters">
         <xsd:restriction base="xsd:string">
@@ -64,6 +64,17 @@
         </xsd:sequence>
     </xsd:complexType>
 
+    <xsd:complexType name="eventsConfig">
+        <xsd:sequence>
+            <xsd:element name="reconnect-interval">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:long">
+                        <xsd:minInclusive value="1"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
 
     <xsd:complexType name="frontiersConfig">
         <xsd:sequence>
@@ -311,6 +322,7 @@
             <xsd:element type="hi:appModeType" name="deployment-mode" nillable="false" maxOccurs="1" minOccurs="0"/>
             <xsd:element type="hi:frontiersConfig" name="frontiers" minOccurs="0" nillable="false" maxOccurs="1"/>
             <xsd:element type="hi:webType" name="web" minOccurs="0" nillable="false" maxOccurs="1"/>
+            <xsd:element type="hi:eventsConfig" name="events" minOccurs="0" maxOccurs="1"/>
             <xsd:element type="hi:securityConfig" name="security" minOccurs="0" nillable="false" maxOccurs="1"/>
             <xsd:element type="hi:i18nType" name="i18n" minOccurs="0" maxOccurs="1" nillable="false"/>
             <xsd:element type="hi:tunningType" name="web-tuning" nillable="false" minOccurs="0" maxOccurs="1"/>
@@ -318,4 +330,5 @@
     </xsd:complexType>
 
     <xsd:element name="app" type="hi:appType" nillable="false"></xsd:element>
+
 </xsd:schema>
