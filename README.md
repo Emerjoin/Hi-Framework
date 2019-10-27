@@ -17,7 +17,7 @@ Now you can fire events from the __backend__ and handle them on the __views__.
 ### Backend
 Creating an event object is as simple as the following example:
 ```java
-	public ExampleEvent extends WebEvent {
+    public ExampleEvent extends WebEvent {
     	//Your properties here
     }
 ```
@@ -29,13 +29,13 @@ The name of the user's private channel must be defined via __ActiveUser__. This 
 Take a look at the code snippet below to learn how to define the user's private channel:
 
 ```java
-	public class Whatever {
+    public class Whatever {
     
     	@Inject
     	private ActiveUser user;
-              
-		public void setPrivateChannelName(){
-        	user.setWebEventChannel("john.ive");
+	
+	public void setPrivateChannelName(){
+            user.setWebEventChannel("john.ive");
         }       
     
     }
@@ -46,17 +46,17 @@ In the code snippet above we define "zeus" as the current user's private channel
 Let's now learn how to subscribe a user to a channel and also how to later unsubscribe:
 
 ```java
-	public class Whatever {
+    public class Whatever {
     
     	@Inject
     	private ActiveUser user;
               
-		public void joinCorporateChannel(){
-        	user.subscribe("corporate");
+	public void joinCorporateChannel(){
+             user.subscribe("corporate");
         }
         
         public void quitCorporateChannel(){
-        	user.unsubscribe("corporate");
+             user.unsubscribe("corporate");
         }
     
     }
@@ -81,7 +81,7 @@ Let's publish an event to be received by every user that is online:
 ```
 Let's now publish an event to a limited set of users:
 ```java
-	public class Whatever {
+    public class Whatever {
     
         @Inject
         private WebEventsContext eventsContext;
@@ -97,7 +97,7 @@ Let's now publish an event to a limited set of users:
 ```
 Let's now publish an event to a bunch of groups and users:
 ```java
-	public class Whatever {
+    public class Whatever {
     
         @Inject
         private WebEventsContext eventsContext;
@@ -121,7 +121,7 @@ The snippet presents how to handle events on view controllers:
 
 ```javascript
 
-	Hi.view(function($scope){
+    Hi.view(function($scope){
     	
         $scope.$on("ExampleEvent",function(event){
         	//Handle event here
@@ -138,7 +138,7 @@ The snippet presents how to handle events on view controllers:
 You might need to handle an event from the template or even from a custom script in your application. Here is how to proceed:
 
 ```javascript
-	Hi.$on("ExampleEvent",function(event){
+    Hi.$on("ExampleEvent",function(event){
     	//Handle event here
     });
 ```
@@ -147,9 +147,9 @@ You might need to handle an event from the template or even from a custom script
 Your application can react to backend connectivity status changes. See examples below:
 
 ```javascript
-	Hi.$events.ready(function(){
+    Hi.$events.ready(function(){
        console.log("Events ready");
-	});
+    });
 
     Hi.$events.offline(function(){
        console.warn("Disconnected");
@@ -180,7 +180,7 @@ xsi:schemaLocation="http://hi-framework.org/XML/1.6.0 http://hi-framework.org/xm
 Hi-Framework now allows you to handle content-expiration properly. You can now define a function on your template, to be invoked whenever the backend detects that front-end is __outdated__, meaning that it requires a __reload__. See the example below:
 
 ```javascript
-	Hi.template({
+    Hi.template({
     	...
         
     	$expired: function(){
