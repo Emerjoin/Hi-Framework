@@ -66,7 +66,7 @@ Let's now learn how to subscribe a user to a channel and also how to later unsub
 Let's publish an event to be received by every user that is online:
 
 ```java
-	public class Whatever {
+    public class Whatever {
     
         @Inject
         private WebEventsContext eventsContext;
@@ -173,6 +173,80 @@ xsi:schemaLocation="http://hi-framework.org/XML/1.6.0 http://hi-framework.org/xm
     ...
 </app>
 
+```
+
+### Getting started
+To start using the __Web-Events__ feature you need to include a __provider__ in your application. The Hi-Framework team worked on a provider to get you started. Here are the Maven coordinates of the provider:
+
+```xml
+    <dependency>
+         <groupId>org.emerjoin.hi.web.events</groupId>
+         <artifactId>vm-scoped-provider</artifactId>
+         <version>1.0.0</version>
+    </dependency>
+```
+
+This ready-made provider won't work well in a scenarion where you have multiple instances of your application deployed, hence the name __vm_scoped_provider__. This provider assumes that all the event listeners are connected to the same application instance, thus assuming a single-instance deployment.
+
+#### Why have providers?
+The __provider__ abstraction allowed __Hi-Framework__ to focus on implementing the events management __core infrastructure__:
+* Listeners management: authentication, reconnection
+* Events delivery: marshalling and transmission
+* Listeners grouping: channels
+* Events handling: Javascript-API
+
+The events infrastructure implemented by Hi-Framework works entirely on an __application-instance__ level. When Hi-Framework is asked to deliver a __WebEvent__, it will deliver that event to all listeners that are connected to the current __application-instance__. The __provider__ abstraction creates the possibility of informing all active __application-instances__ to deliver that event. The same applies to channels subscriptions. When Hi-Framework is asked to subscribe the current user to a specific channel, it will only subscribe the listeners that are connected to the current __application-instance__. Providers are meant to implement cluster-awareness on top of the __events infrastructure__ provided by Hi-Framework.
+
+
+### Implementing a provider
+The management of the event consumers and the delivery of the event are both managed at the __Hi-Framework__ level by the __WebEventsController__. A __Web-events provider__ acts as an intermediate between the __application__ and the __WebEventsController__. 
+Every behaviour triggered on the __application-level__ is only made effective by Hi-Framework __WebEventsController__, going through a __Web-events provider__: 
+* Channel subscription (join/quit)
+* Events publishing.
+
+
+#### Channel subscription
+When an application calls __ActiveUser.subscribe("channel")__ or __ActiveUser.unsubscribe("channel")__ the following CDI events are fired respectively:
+* JoinChannel
+* QuitChannel
+These events must be handled by the __provider__.
+
+
+#### Events publishing
+Because __WebEvents__ are published using the __WebEventsContext__ abstraction, a __Web-events provider__ is required to provide a __WebEventsContext__ CDI bean.
+
+#### Example:
+The code snippet below presents the __vm_scoped_provider__ implementation:
+```java
+@ApplicationScoped
+public class VMScopedWebEventsContext implements WebEventsContext {
+
+    @Inject
+    private WebEventsController eventsController;
+
+    @Override
+    public void publish(WebEvent event) {
+        WebEventPublishRequest request = new WebEventPublishRequest(event);
+        eventsController.execute(request);
+    }
+
+    @Override
+    public void publish(WebEvent event, String... channels) {
+        WebEventPublishRequest request = new WebEventPublishRequest(event, channels);
+        eventsController.execute(request);
+    }
+
+    public void onJoinChannel(@Observes JoinChannel event){
+        eventsController.joinChannel(event.getUser().getUniqueId(),
+                event.getChannel());
+    }
+
+    public void onQuitChannel(@Observes QuitChannel event){
+        eventsController.quitChannel(event.getUser().getUniqueId(),event.
+                getChannel());
+    }
+
+}
 ```
 
 
