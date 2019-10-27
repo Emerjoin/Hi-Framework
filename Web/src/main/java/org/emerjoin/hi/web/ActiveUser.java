@@ -1,8 +1,8 @@
 package org.emerjoin.hi.web;
 
-import org.emerjoin.hi.web.events.sse.AbstractChannelEvent;
-import org.emerjoin.hi.web.events.sse.ChannelJoinEvent;
-import org.emerjoin.hi.web.events.sse.ChannelQuitEvent;
+import org.emerjoin.hi.web.events.sse.UserSubscriptionEvent;
+import org.emerjoin.hi.web.events.sse.JoinChannel;
+import org.emerjoin.hi.web.events.sse.QuitChannel;
 import org.emerjoin.hi.web.security.SecureTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class ActiveUser implements Serializable {
     private static final SecureTokenUtil csrfTokeUtil = new SecureTokenUtil();
 
     @Inject
-    private transient Event<AbstractChannelEvent> channelEvent;
+    private transient Event<UserSubscriptionEvent> channelEvent;
 
     @PostConstruct
     public void init(){
@@ -90,14 +90,16 @@ public class ActiveUser implements Serializable {
         if (webEventChannel == null || webEventChannel.isEmpty())
             throw new IllegalArgumentException("webEventChannel must not be null nor empty");
         this.webEventSubscriptions.add(webEventChannel);
-        channelEvent.fire(new ChannelJoinEvent(uniqueId, webEventChannel));
+        channelEvent.fire(new JoinChannel(this,
+                webEventChannel));
     }
 
     public void unsubscribe(String webEventChannel){
         if(webEventChannel==null||webEventChannel.isEmpty())
             throw new IllegalArgumentException("webEventChannel must not be null nor empty");
         if(this.webEventSubscriptions.remove(webEventChannel))
-            channelEvent.fire(new ChannelQuitEvent(uniqueId,webEventChannel));
+            channelEvent.fire(new QuitChannel(this,
+                    webEventChannel));
     }
 
     public boolean isSubscribedTo(String webEventChannel){
