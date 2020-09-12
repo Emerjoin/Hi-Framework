@@ -1,3 +1,6 @@
+# Notice
+This project has moved to Gitlab: https://gitlab.com/emerjoin-oss/hi-framework/core.
+
 # Hi-Framework
 It's a light Java Framework that allows developers to write fully Ajax web applications combining the power of a Java back-end to a rich client-side powered by AngularJS.
 
