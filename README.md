@@ -1,4 +1,4 @@
-# Notice
+# IMPORTANT NOTICE
 This project has moved to Gitlab: https://gitlab.com/emerjoin-oss/hi-framework/core.
 
 # Hi-Framework
